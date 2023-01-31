@@ -1,5 +1,4 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import "./Account.css";
 import {
@@ -13,7 +12,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 
-export default function AskConfirmationBeforeSave() {
+export default function Account() {
   const noButtonRef = React.useRef(null);
   const [rowValues, setRowValues] = React.useState(null);
   const [snackbar, setSnackbar] = React.useState(null);
@@ -93,7 +92,7 @@ export default function AskConfirmationBeforeSave() {
     { field: "status", headerName: "Status", width: 130, editable: true },
   ];
 
-  const Account = () => {
+  const AccountTable = () => {
     if (!rowValues) {
       return null;
     }
@@ -131,7 +130,7 @@ export default function AskConfirmationBeforeSave() {
           margin: "auto",
         }}
       >
-        {Account()}
+        {AccountTable()}
         <DataGrid
           rows={accounts.map((account) => ({
             id: account.id,
