@@ -8,6 +8,7 @@ import Customer from "./pages/customer/Customer";
 import Deliverer from "./pages/deliverer/Deliverer";
 import Deliveries from "./pages/deliveries/Deliveries";
 import PickupBoxes from "./pages/pickup-boxes/PickupBoxes";
+import Register from "./pages/register/Register";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route exact path="/deliverers" element={<Deliverer />} />
         <Route exact path="/deliveries" element={<Deliveries />} />
         <Route exact path="/pickup-boxes" element={<PickupBoxes />} />
+        <Route exact path="/sign-up" element={<Register />} />
       </Routes>
     </Router>
   );
