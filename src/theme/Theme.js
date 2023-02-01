@@ -13,8 +13,14 @@ const theme = createTheme({
     body: {
       fontFamily: "Lucida",
     },
+    title: {
+      fontFamily: "Lucida",
+      fontSize: 40,
+      fontWeight: "bold",
+    },
     h2: {
       fontFamily: "Lucida",
+      fontSize: 50,
       fontWeight: "bold",
     },
     button: {
