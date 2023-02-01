@@ -3,6 +3,7 @@ import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./pages/login/Login";
 import Account from "./pages/account/Account";
+import Dispatcher from "./pages/dispatcher/Dispatcher";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route exact path="/" element={<Login />} />
         <Route exact path="/account" element={<Account />} />
+        <Route exact path="/dispatcher" element={<Dispatcher />} />
       </Routes>
     </Router>
   );
