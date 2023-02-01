@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+
+.App-background {
+  position: relative;
+  z-index: 1;
+}
+
+.App-background .bg {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #bfbdff;
+  opacity: 0.3;
+  height: 100vh;
+}
