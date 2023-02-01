@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import "./Account.css";
+import "../../App.css";
+import Header from "../Header";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "../../theme/Theme";
 import {
   Snackbar,
   Dialog,
@@ -9,8 +12,10 @@ import {
   DialogActions,
   Button,
   Alert,
+  Box,
 } from "@mui/material";
 import axios from "axios";
+import baseURL from "../../API";
 
 export default function Account() {
   const noButtonRef = React.useRef(null);
@@ -32,22 +37,19 @@ export default function Account() {
   const [accounts, setAccount] = useState([]);
   const getAccount = () => {
     axios
-      .get(
-        "https://3e0a-138-246-3-200.eu.ngrok.io/delivery/user/63d54d91f74e26d3d2748bbf",
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "ase",
-          },
-          params: {
-            id: "",
-            box: {},
-            customer: {},
-            deliverer: {},
-            status: "",
-            trackingID: "",
-          },
-        }
-      )
+      .get(`${baseURL}/delivery/user/63d54d91f74e26d3d2748bbf`, {
+        headers: {
+          "ngrok-skip-browser-warning": "ase",
+        },
+        params: {
+          id: "",
+          box: {},
+          customer: {},
+          deliverer: {},
+          status: "",
+          trackingID: "",
+        },
+      })
       .then((response) => {
         setAccount(response.data);
         console.log(response.data);
@@ -120,37 +122,58 @@ export default function Account() {
   };
 
   return (
-    <div class="account-background">
-      <div class="bg"></div>
-      <div
-        style={{
-          height: 400,
-          width: "80%",
-          backgroundColor: "white",
-          margin: "auto",
-        }}
-      >
+    <ThemeProvider theme={theme}>
+      <div class="App-background">
+        <div class="App-background bg"></div>
+        {/* <div
+          style={{
+            height: 400,
+            width: "80%",
+            backgroundColor: "white",
+            margin: "auto",
+          }}
+        > */}
         {AccountTable()}
-        <DataGrid
-          rows={accounts.map((account) => ({
-            id: account.id,
-            trackingCode: account.trackingID,
-            boxName: account.box.name,
-            boxAddress: account.box.streetAddress,
-            customer: account.customer.rfidtoken,
-            status: account.status,
-          }))}
-          columns={columns}
-          pageSize={5}
-          processRowUpdate={processRowUpdate}
-          experimentalFeatures={{ newEditingApi: true }}
-        />
-        {!!snackbar && (
-          <Snackbar open onClose={handleCloseSnackbar} autoHideDuration={6000}>
-            <Alert {...snackbar} onClose={handleCloseSnackbar} />
-          </Snackbar>
-        )}
+        <Header />
+        <Box
+          display="flex"
+          justifyContent={"center"}
+          flexDirection="column"
+          marginX={10}
+          marginTop={5}
+          sx={{ height: "75vh", width: "90%" }}
+        >
+          <DataGrid
+            rows={accounts.map((account) => ({
+              id: account.id,
+              trackingCode: account.trackingID,
+              boxName: account.box.name,
+              boxAddress: account.box.streetAddress,
+              customer: account.customer.rfidtoken,
+              status: account.status,
+            }))}
+            columns={columns}
+            pageSize={5}
+            rowsPerPageOptions={[5]}
+            processRowUpdate={processRowUpdate}
+            experimentalFeatures={{ newEditingApi: true }}
+            style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
+            sx={{
+              boxShadow: "5",
+            }}
+          />
+          {!!snackbar && (
+            <Snackbar
+              open
+              onClose={handleCloseSnackbar}
+              autoHideDuration={6000}
+            >
+              <Alert {...snackbar} onClose={handleCloseSnackbar} />
+            </Snackbar>
+          )}
+        </Box>
       </div>
-    </div>
+      {/* </div> */}
+    </ThemeProvider>
   );
 }

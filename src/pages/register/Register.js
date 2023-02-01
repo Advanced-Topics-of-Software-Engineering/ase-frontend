@@ -6,15 +6,24 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
-import "./Login.css";
+import "./Register.css";
 
-const Login = () => {
-  const [inputs, setInputs] = useState({ email: "", password: "" });
+const Register = () => {
+  const [inputs, setInputs] = useState({
+    rfidToken: "",
+    email: "",
+    password: "",
+  });
+  const [userType, setUserType] = useState();
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -34,7 +43,7 @@ const Login = () => {
   return (
     <ThemeProvider theme={theme}>
       <form onSubmit={handleSubmit}>
-        <div class="login-background">
+        <div class="register-background">
           <div class="bg"></div>
           <Box
             display="flex"
@@ -55,11 +64,11 @@ const Login = () => {
           >
             <Typography
               marginBottom={"30px"}
-              variant="h2"
+              variant="title"
               color="#660090"
               textAlign="center"
             >
-              Login
+              Create new account
             </Typography>
             <TextField
               fullWidth
@@ -71,6 +80,28 @@ const Login = () => {
               type={"email"}
               variant="outlined"
               label="email"
+              InputProps={{
+                classes: {
+                  notchedOutline: "input-border",
+                },
+              }}
+              InputLabelProps={{
+                classes: {
+                  root: "inputLabel",
+                  focused: "inputLabel",
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              required
+              onChange={handleChange}
+              name="rfidToken"
+              value={inputs.rfidToken}
+              margin="normal"
+              type={"text"}
+              variant="outlined"
+              label="rfid token"
               InputProps={{
                 classes: {
                   notchedOutline: "input-border",
@@ -125,6 +156,36 @@ const Login = () => {
               variant="outlined"
               label="password"
             />
+            <FormControl fullWidth required margin="normal" variant="outlined">
+              <InputLabel style={{ color: "#660090" }}>user type</InputLabel>
+              <Select
+                variant="outlined"
+                value={userType}
+                onChange={handleChange}
+                autoWidth
+                label="user type"
+                sx={{
+                  ".MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#660090",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#660090",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#660090",
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    color: "#660090",
+                  },
+                  ".MuiSvgIcon-root ": {
+                    fill: "#660090",
+                  },
+                }}
+              >
+                <MenuItem value="Deliverer">Deliverer</MenuItem>
+                <MenuItem value="Customer">Customer</MenuItem>
+              </Select>
+            </FormControl>
             <Button
               type="submit"
               sx={{ marginTop: 3, borderRadius: 3 }}
@@ -136,7 +197,7 @@ const Login = () => {
                 marginTop: "50px",
               }}
             >
-              Login
+              Register
             </Button>
           </Box>
         </div>
@@ -145,4 +206,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
