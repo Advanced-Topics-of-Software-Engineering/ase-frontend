@@ -6,6 +6,7 @@ import Account from "./pages/account/Account";
 import Dispatcher from "./pages/dispatcher/Dispatcher";
 import Customer from "./pages/customer/Customer";
 import Deliverer from "./pages/deliverer/Deliverer";
+import Deliveries from "./pages/deliveries/Deliveries";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route exact path="/dispatcher" element={<Dispatcher />} />
         <Route exact path="/customers" element={<Customer />} />
         <Route exact path="/deliverers" element={<Deliverer />} />
+        <Route exact path="/deliveries" element={<Deliveries />} />
       </Routes>
     </Router>
   );
