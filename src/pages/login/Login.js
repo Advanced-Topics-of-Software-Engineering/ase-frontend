@@ -14,9 +14,8 @@ import theme from "../../theme/Theme";
 import "./Login.css";
 
 const Login = () => {
-  const [inputs, setInputs] = useState({ email: "", password: "" });
+  const [inputs, setInputs] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = React.useState(false);
-
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleChange = (e) => {
@@ -65,12 +64,12 @@ const Login = () => {
               fullWidth
               required
               onChange={handleChange}
-              name="email"
-              value={inputs.email}
+              name="username"
+              value={inputs.username}
               margin="normal"
-              type={"email"}
+              type={"text"}
               variant="outlined"
-              label="email"
+              label="username"
               InputProps={{
                 classes: {
                   notchedOutline: "input-border",
