@@ -52,7 +52,7 @@ const Register = () => {
             alignItems="center"
             justifyContent={"center"}
             margin={"auto"}
-            padding={10}
+            padding={5}
             borderRadius={5}
             boxShadow={"5px 5px 10px #ccc"}
             backgroundColor="#fcfceb"
@@ -63,7 +63,7 @@ const Register = () => {
             }}
           >
             <Typography
-              marginBottom={"30px"}
+              marginBottom={"20px"}
               variant="title"
               color="#660090"
               textAlign="center"
@@ -96,12 +96,12 @@ const Register = () => {
               fullWidth
               required
               onChange={handleChange}
-              name="rfidToken"
-              value={inputs.rfidToken}
+              name="username"
+              value={inputs.username}
               margin="normal"
               type={"text"}
               variant="outlined"
-              label="rfid token"
+              label="username"
               InputProps={{
                 classes: {
                   notchedOutline: "input-border",
@@ -156,6 +156,28 @@ const Register = () => {
               variant="outlined"
               label="password"
             />
+            <TextField
+              fullWidth
+              required
+              onChange={handleChange}
+              name="rfidToken"
+              value={inputs.rfidToken}
+              margin="normal"
+              type={"text"}
+              variant="outlined"
+              label="rfid token"
+              InputProps={{
+                classes: {
+                  notchedOutline: "input-border",
+                },
+              }}
+              InputLabelProps={{
+                classes: {
+                  root: "inputLabel",
+                  focused: "inputLabel",
+                },
+              }}
+            />
             <FormControl fullWidth required margin="normal" variant="outlined">
               <InputLabel style={{ color: "#660090" }}>user type</InputLabel>
               <Select
@@ -188,13 +210,13 @@ const Register = () => {
             </FormControl>
             <Button
               type="submit"
-              sx={{ marginTop: 3, borderRadius: 3 }}
+              sx={{ borderRadius: 3 }}
               variant="contained"
               color="primary"
               style={{
                 height: "40px",
                 width: "140px",
-                marginTop: "50px",
+                marginTop: "20px",
               }}
             >
               Register
