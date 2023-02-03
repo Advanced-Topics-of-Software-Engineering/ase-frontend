@@ -16,14 +16,17 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import "./Register.css";
+import Header from "../Header";
+import axios from "axios";
 
 const Register = () => {
   const [inputs, setInputs] = useState({
     rfidToken: "",
     email: "",
     password: "",
+    username: "",
   });
-  const [userType, setUserType] = useState();
+  const [userType, setUserType] = useState("");
   const [showPassword, setShowPassword] = React.useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -35,14 +38,18 @@ const Register = () => {
     }));
   };
 
+  const handleUserTypeChange = (e) => {
+    setUserType(e.target.value);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(inputs);
   };
 
   return (
     <ThemeProvider theme={theme}>
       <form onSubmit={handleSubmit}>
+        <Header />
         <div class="register-background">
           <div class="bg"></div>
           <Box
@@ -183,7 +190,7 @@ const Register = () => {
               <Select
                 variant="outlined"
                 value={userType}
-                onChange={handleChange}
+                onChange={handleUserTypeChange}
                 autoWidth
                 label="user type"
                 sx={{
@@ -204,8 +211,8 @@ const Register = () => {
                   },
                 }}
               >
-                <MenuItem value="Deliverer">Deliverer</MenuItem>
-                <MenuItem value="Customer">Customer</MenuItem>
+                <MenuItem value="ROLE_DELIVERER">deliverer</MenuItem>
+                <MenuItem value="ROLE_CUSTOMER">customer</MenuItem>
               </Select>
             </FormControl>
             <Button
