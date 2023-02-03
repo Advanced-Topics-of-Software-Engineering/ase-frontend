@@ -12,6 +12,7 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import "./Login.css";
+import axios from "axios";
 
 const Login = () => {
   const [inputs, setInputs] = useState({ username: "", password: "" });
@@ -27,7 +28,18 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(inputs);
+    const user = {
+      username: inputs.username,
+      password: inputs.password,
+    };
+    axios
+      .post("https://7cce-138-246-3-200.eu.ngrok.io/api/auth/signin", user)
+      .then((response) => {
+        console.log(response.status);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
