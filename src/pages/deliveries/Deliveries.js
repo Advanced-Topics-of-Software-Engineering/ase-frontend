@@ -3,82 +3,118 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import Header from "../Header";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box } from "@mui/material";
+import { Box, Button, Snackbar, Alert } from "@mui/material";
 import "../../App.css";
 import axios from "axios";
 import baseURL from "../../API";
 import Accordion from "../Accordion";
+import ResponsiveDialog from "../ResponsiveDialog";
 
 const columns = [
-  { field: "id", headerName: "ID", width: 250 },
+  { field: "id", headerName: "ID", flex: 1 },
   {
     field: "status",
     headerName: "Status",
-    width: 100,
+    flex: 0.5,
     editable: true,
-    sortable: false,
+    type: "singleSelect",
+    valueOptions: ["Ordered", "On Delivery", "Delivered", "Completed"],
   },
   {
     field: "trackingID",
     headerName: "Tracking ID",
-    width: 150,
+    flex: 1,
     editable: true,
-    sortable: false,
   },
   {
     field: "boxName",
     headerName: "Box Name",
-    width: 100,
+    flex: 0.5,
     editable: true,
-    sortable: false,
   },
   {
     field: "boxAddress",
     headerName: "Box Address",
-    width: 200,
+    flex: 1,
     editable: true,
-    sortable: false,
   },
   {
     field: "customerId",
-    headerName: "Customer ID",
-    width: 250,
+    headerName: "Customer Name",
+    flex: 1,
     editable: true,
-    sortable: false,
   },
   {
     field: "delivererId",
-    headerName: "Deliverer ID",
-    width: 250,
+    headerName: "Deliverer Name",
+    flex: 1,
     editable: true,
-    sortable: false,
+  },
+  {
+    field: "boxID",
+    hide: true,
   },
 ];
 
 const Deliveries = () => {
   const [deliveries, setDeliveries] = useState([]);
+  const [updatedDeliveries, setUpdatedDeliveries] = useState([]);
+  const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [error, setError] = useState();
+
+  const handleProcessRowUpdate = (newRow, oldRow) => {
+    setUpdatedDeliveries([...updatedDeliveries, newRow]);
+  };
+
   const getDeliveries = () => {
     axios
       .get(`${baseURL}/delivery`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
         },
-        params: {
-          id: "",
-          status: "",
-          trackingID: "",
-          box: {},
-          customer: {},
-          deliverer: {},
-        },
       })
       .then((response) => {
         setDeliveries(response.data);
-        console.log(deliveries);
       })
       .catch((error) => {
         console.error(error);
       });
+  };
+
+  const updateDeliveries = async () => {
+    for (let i = 0; i < updatedDeliveries.length; i++) {
+      const newDelivery = {
+        id: updatedDeliveries[i].id,
+        status: updatedDeliveries[i].status,
+        trackingID: updatedDeliveries[i].trackingID,
+        box: {
+          id: updatedDeliveries[i].boxID,
+          streetAddress: updatedDeliveries[i].boxAddress,
+          name: updatedDeliveries[i].boxName,
+        },
+        customer: {
+          id: updatedDeliveries[i].customerId,
+        },
+        deliverer: {
+          id: updatedDeliveries[i].delivererId,
+        },
+      };
+      axios
+        .post(
+          `${baseURL}/delivery/update/${updatedDeliveries[i].id}`,
+          newDelivery
+        )
+        .then((response) => {
+          console.log(response.status);
+          setError("");
+          setIsOpenAlert(true);
+        })
+        .catch((error) => {
+          setError(error.toJSON().message);
+          setIsOpenAlert(true);
+        });
+    }
   };
 
   useEffect(() => {
@@ -108,18 +144,60 @@ const Deliveries = () => {
               boxAddress: delivery.box.streetAddress,
               customerId: delivery.customer.id,
               delivererId: delivery.deliverer.id,
+              boxID: delivery.box.id,
             }))}
             columns={columns}
             editMode="row"
             pageSize={7}
-            rowsPerPageOptions={[5]}
             disableSelectionOnClick
+            disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
-            style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
+            processRowUpdate={handleProcessRowUpdate}
+            style={{
+              marginTop: 10,
+              backgroundColor: "#fcfbfa",
+            }}
             sx={{
               boxShadow: "5",
             }}
           />
+          <Button
+            type="submit"
+            sx={{ borderRadius: 1 }}
+            variant="contained"
+            color="primary"
+            style={{
+              height: "40px",
+              width: "200px",
+              marginTop: "10px",
+            }}
+            onClick={() => {
+              setIsOpenDialog(true);
+            }}
+          >
+            Submit Changes
+          </Button>
+          <ResponsiveDialog
+            isOpen={isOpenDialog}
+            handleClose={() => setIsOpenDialog(false)}
+            title="Are you sure?"
+            handleYesClick={updateDeliveries}
+          />
+          {isOpenAlert && (
+            <Snackbar
+              open={isOpenAlert}
+              autoHideDuration={6000}
+              onClose={() => setIsOpenAlert(null)}
+            >
+              <Alert
+                onClose={() => setIsOpenAlert(null)}
+                severity={error === "" ? "success" : "error"}
+                sx={{ width: "100%" }}
+              >
+                {error === "" ? "Values successfully changed" : error}
+              </Alert>
+            </Snackbar>
+          )}
         </Box>
       </div>
     </ThemeProvider>
