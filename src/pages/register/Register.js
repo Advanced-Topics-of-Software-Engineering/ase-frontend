@@ -44,6 +44,26 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const user = {
+      username: inputs.username,
+      email: inputs.email,
+      userType: userType,
+      password: inputs.password,
+      rfidToken: inputs.rfidToken,
+    };
+    axios
+      .post("https://7cce-138-246-3-200.eu.ngrok.io/api/auth/signup", user, {
+        headers: {
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZ2VoYW5fdGVzdCIsImlhdCI6MTY3NTM2OTA1NiwiZXhwIjoxNjc1NDU1NDU2fQ.SsZItShrBnsf84wo12QqVNfHva8cA2cJM8jZts_x2uM",
+        },
+      })
+      .then((response) => {
+        console.log(response.status);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
