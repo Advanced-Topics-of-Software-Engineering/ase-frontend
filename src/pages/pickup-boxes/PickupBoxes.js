@@ -33,6 +33,7 @@ const PickupBoxes = () => {
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [error, setError] = useState();
   const [deletedBoxes, setDeletedBoxes] = useState([]);
+  const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedBoxes([...updatedBoxes, newRow]);
@@ -59,6 +60,7 @@ const PickupBoxes = () => {
   };
 
   const updateBoxes = () => {
+    console.log("update");
     for (let i = 0; i < updatedBoxes.length; i++) {
       const newBox = {
         name: updatedBoxes[i].name,
@@ -70,26 +72,30 @@ const PickupBoxes = () => {
           console.log(response.status);
           setError("");
           setIsOpenAlert(true);
+          setIsAlertforDelete(false);
         })
         .catch((error) => {
           setError(error.toJSON().message);
           setIsOpenAlert(true);
+          setIsAlertforDelete(false);
         });
     }
   };
 
   const deleteBoxes = () => {
+    console.log("delete");
     for (let i = 0; i < deletedBoxes.length; i++) {
       axios
         .post(`${baseURL}/box/delete/${deletedBoxes[i]}`)
         .then((response) => {
-          console.log(response.status);
           setError("");
           setIsOpenAlert(true);
+          setIsAlertforDelete(true);
         })
         .catch((error) => {
           setError(error.toJSON().message);
           setIsOpenAlert(true);
+          setIsAlertforDelete(true);
         });
     }
   };
@@ -126,6 +132,7 @@ const PickupBoxes = () => {
             editMode="row"
             pageSize={7}
             disableSelectionOnClick
+            disableColumnMenu
             checkboxSelection
             experimentalFeatures={{ newEditingApi: true }}
             onSelectionModelChange={(itm) => setDeletedBoxes(itm)}
@@ -184,7 +191,9 @@ const PickupBoxes = () => {
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
-            handleYesClick={updateBoxes}
+            handleYesClick={() => {
+              isAlertforDelete ? updateBoxes() : deleteBoxes();
+            }}
           />
           {isOpenAlert && (
             <Snackbar
@@ -197,28 +206,11 @@ const PickupBoxes = () => {
                 severity={error === "" ? "success" : "error"}
                 sx={{ width: "100%" }}
               >
-                {error === "" ? "Values successfully changed" : error}
-              </Alert>
-            </Snackbar>
-          )}
-          <ResponsiveDialog
-            isOpen={isOpenDialog}
-            handleClose={() => setIsOpenDialog(false)}
-            title="Are you sure?"
-            handleYesClick={deleteBoxes}
-          />
-          {isOpenAlert && (
-            <Snackbar
-              open={isOpenAlert}
-              autoHideDuration={6000}
-              onClose={() => setIsOpenAlert(null)}
-            >
-              <Alert
-                onClose={() => setIsOpenAlert(null)}
-                severity={error === "" ? "success" : "error"}
-                sx={{ width: "100%" }}
-              >
-                {error === "" ? "Values successfully deleted" : error}
+                {error === ""
+                  ? `Pickup ${deletedBoxes.length > 1 ? "boxes" : "box "} ${
+                      isAlertforDelete ? "deleted" : "updated"
+                    } successfully`
+                  : error}
               </Alert>
             </Snackbar>
           )}

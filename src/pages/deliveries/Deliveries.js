@@ -61,6 +61,7 @@ const Deliveries = () => {
   const [updatedDeliveries, setUpdatedDeliveries] = useState([]);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [isAlertforDelete, setIsAlertforDelete] = useState(false);
   const [error, setError] = useState();
   const [deletedDeliveries, setDeletedDeliveries] = useState([]);
 
@@ -110,10 +111,12 @@ const Deliveries = () => {
           console.log(response.status);
           setError("");
           setIsOpenAlert(true);
+          setIsAlertforDelete(false);
         })
         .catch((error) => {
           setError(error.toJSON().message);
           setIsOpenAlert(true);
+          setIsAlertforDelete(false);
         });
     }
   };
@@ -123,13 +126,14 @@ const Deliveries = () => {
       axios
         .post(`${baseURL}/box/delete/${deletedDeliveries[i]}`)
         .then((response) => {
-          console.log(response.status);
           setError("");
           setIsOpenAlert(true);
+          setIsAlertforDelete(true);
         })
         .catch((error) => {
           setError(error.toJSON().message);
           setIsOpenAlert(true);
+          setIsAlertforDelete(true);
         });
     }
   };
@@ -159,8 +163,8 @@ const Deliveries = () => {
               trackingID: delivery.trackingID,
               boxName: delivery.box.name,
               boxAddress: delivery.box.streetAddress,
-              customerId: delivery.customer.id,
-              delivererId: delivery.deliverer.id,
+              customerID: delivery.customerID,
+              delivererID: delivery.delivererID,
               boxID: delivery.box.id,
             }))}
             columns={columns}
@@ -168,6 +172,7 @@ const Deliveries = () => {
             pageSize={7}
             disableSelectionOnClick
             disableColumnMenu
+            checkboxSelection
             experimentalFeatures={{ newEditingApi: true }}
             onSelectionModelChange={(itm) => setDeletedDeliveries(itm)}
             processRowUpdate={handleProcessRowUpdate}
@@ -226,7 +231,9 @@ const Deliveries = () => {
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
-            handleYesClick={updateDeliveries}
+            handleYesClick={() => {
+              isAlertforDelete ? updateDeliveries() : deleteDeliveries();
+            }}
           />
           {isOpenAlert && (
             <Snackbar
@@ -239,28 +246,11 @@ const Deliveries = () => {
                 severity={error === "" ? "success" : "error"}
                 sx={{ width: "100%" }}
               >
-                {error === "" ? "Values successfully changed" : error}
-              </Alert>
-            </Snackbar>
-          )}
-          <ResponsiveDialog
-            isOpen={isOpenDialog}
-            handleClose={() => setIsOpenDialog(false)}
-            title="Are you sure?"
-            handleYesClick={deleteDeliveries}
-          />
-          {isOpenAlert && (
-            <Snackbar
-              open={isOpenAlert}
-              autoHideDuration={6000}
-              onClose={() => setIsOpenAlert(null)}
-            >
-              <Alert
-                onClose={() => setIsOpenAlert(null)}
-                severity={error === "" ? "success" : "error"}
-                sx={{ width: "100%" }}
-              >
-                {error === "" ? "Values successfully deleted" : error}
+                {error === ""
+                  ? ` ${
+                      deletedDeliveries.length > 1 ? "Deliveries" : "Delivery "
+                    } ${isAlertforDelete ? "deleted" : "updated"} successfully`
+                  : error}
               </Alert>
             </Snackbar>
           )}
