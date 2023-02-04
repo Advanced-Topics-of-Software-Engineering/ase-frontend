@@ -6,6 +6,8 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
@@ -13,11 +15,14 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import "./Login.css";
 import axios from "axios";
+import url from "../../API";
 
 const Login = () => {
   const [inputs, setInputs] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [error, setError] = useState();
 
   const handleChange = (e) => {
     setInputs((prevState) => ({
@@ -28,17 +33,21 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const user = {
-      username: inputs.username,
-      password: inputs.password,
-    };
+
     axios
-      .post("https://7cce-138-246-3-200.eu.ngrok.io/api/auth/signin", user)
+      .post(`${url.auth}/api/auth/signin`, {
+        username: inputs.username,
+        password: inputs.password,
+      })
       .then((response) => {
-        console.log(response.status);
+        if (response.data.accessToken) {
+          sessionStorage.setItem("user", JSON.stringify(response.data));
+          setRedirect(true);
+        }
       })
       .catch((error) => {
-        console.error(error);
+        setError(error.toJSON().message);
+        setIsOpenAlert(true);
       });
   };
 
@@ -149,6 +158,25 @@ const Login = () => {
             >
               Login
             </Button>
+            {isOpenAlert && (
+              <Snackbar
+                open={isOpenAlert}
+                autoHideDuration={1000}
+                onClose={() => {
+                  setIsOpenAlert(null);
+                }}
+              >
+                <Alert
+                  onClose={() => {
+                    setIsOpenAlert(null);
+                  }}
+                  severity={"error"}
+                  sx={{ width: "100%" }}
+                >
+                  {error}
+                </Alert>
+              </Snackbar>
+            )}
           </Box>
         </div>
       </form>
