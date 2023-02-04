@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
-  TextField,
   Typography,
   Button,
   Select,
@@ -12,6 +11,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
+import Input from "./Input/Input";
 
 export default function CustomAccordion({
   datas,
@@ -96,27 +96,10 @@ export default function CustomAccordion({
             {!isTextBoxes &&
               Object.entries(datas).map(([key, value], index) => {
                 return (
-                  <TextField
-                    fullWidth
-                    required
+                  <Input
                     name={value.title}
-                    value={newObject[index]}
                     onChange={handleChange(index)}
-                    margin="normal"
-                    type={"text"}
-                    variant="outlined"
                     label={value.title}
-                    InputProps={{
-                      classes: {
-                        notchedOutline: "input-border",
-                      },
-                    }}
-                    InputLabelProps={{
-                      classes: {
-                        root: "inputLabel",
-                        focused: "inputLabel",
-                      },
-                    }}
                   />
                 );
               })}

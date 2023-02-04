@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
-import Header from "../Header";
+import Header from "../../components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Snackbar, Alert } from "@mui/material";
 import "../../App.css";
 import axios from "axios";
 import url from "../../API";
-import CustomAccordion from "../CustomAccordion";
-import ResponsiveDialog from "../ResponsiveDialog";
+import CustomAccordion from "../../components/CustomAccordion";
+import ResponsiveDialog from "../../components/ResponsiveDialog";
 
 const columns = [
   { field: "id", headerName: "ID", flex: 1 },
