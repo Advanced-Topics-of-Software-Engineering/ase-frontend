@@ -3,10 +3,12 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#660090",
+      main: "#764c87",
+      contrastText: "#ffffff",
     },
     secondary: {
       main: "#fcfceb",
+      contrastText: "#ffffff",
     },
   },
   typography: {
@@ -28,6 +30,13 @@ const theme = createTheme({
       fontWeight: "bold",
       fontSize: 20,
       textTransform: "capitalize",
+    },
+    h3: {
+      fontFamily: "Lucida",
+      fontWeight: "bold",
+      fontSize: 23,
+      textTransform: "capitalize",
+      color: "white",
     },
   },
 });
