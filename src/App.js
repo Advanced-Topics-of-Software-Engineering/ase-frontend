@@ -9,6 +9,7 @@ import Deliverer from "./pages/deliverer/Deliverer";
 import Deliveries from "./pages/deliveries/Deliveries";
 import PickupBoxes from "./pages/pickup-boxes/PickupBoxes";
 import Register from "./pages/register/Register";
+import Dispatcher from "./pages/dispatcher/Dispatcher";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route exact path="/" element={<Login />} />
         <Route exact path="/account" element={<Account />} />
         <Route exact path="/dispatcher" element={<Dispatcher />} />
+        <Route exact path="/dispatchers" element={<Dispatcher />} />
         <Route exact path="/customers" element={<Customer />} />
         <Route exact path="/deliverers" element={<Deliverer />} />
         <Route exact path="/deliveries" element={<Deliveries />} />
