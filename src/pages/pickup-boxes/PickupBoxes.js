@@ -6,8 +6,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Snackbar, Alert } from "@mui/material";
 import "../../App.css";
 import axios from "axios";
-import baseURL from "../../API";
-import CustomAccordion from "../Accordion";
+import url from "../../API";
+import CustomAccordion from "../CustomAccordion";
 import ResponsiveDialog from "../ResponsiveDialog";
 
 const columns = [
@@ -27,28 +27,42 @@ const columns = [
 ];
 
 const PickupBoxes = () => {
-  const [boxes, setBoxes] = useState([]);
+  const [boxes, setBoxes] = useState([
+    {
+      id: "",
+      name: "",
+      streetAddress: "",
+    },
+  ]);
+
+  const [auth, setAuth] = useState([
+    {
+      accessToken: "",
+      email: "",
+      id: "",
+      tokenType: "",
+      userType: "",
+      username: "",
+    },
+  ]);
+
+  const [error, setError] = useState();
+  const [newBox, setNewBox] = useState([]);
   const [updatedBoxes, setUpdatedBoxes] = useState([]);
+  const [deletedBoxes, setDeletedBoxes] = useState([]);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
-  const [error, setError] = useState();
-  const [deletedBoxes, setDeletedBoxes] = useState([]);
   const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedBoxes([...updatedBoxes, newRow]);
   };
 
-  const getBoxes = () => {
+  const getBoxes = async () => {
     axios
-      .get(`${baseURL}/box`, {
+      .get(`${url.base}/box`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
-        },
-        params: {
-          id: "",
-          name: "",
-          streetAddress: "",
         },
       })
       .then((response) => {
@@ -59,17 +73,14 @@ const PickupBoxes = () => {
       });
   };
 
-  const updateBoxes = () => {
-    console.log("update");
+  const updateBoxes = async () => {
     for (let i = 0; i < updatedBoxes.length; i++) {
-      const newBox = {
-        name: updatedBoxes[i].name,
-        streetAddress: updatedBoxes[i].address,
-      };
       axios
-        .post(`${baseURL}/box/update/${updatedBoxes[i].id}`, newBox)
+        .post(`${url.base}/box/update/${updatedBoxes[i].id}`, {
+          name: updatedBoxes[i].name,
+          streetAddress: updatedBoxes[i].address,
+        })
         .then((response) => {
-          console.log(response.status);
           setError("");
           setIsOpenAlert(true);
           setIsAlertforDelete(false);
@@ -83,10 +94,9 @@ const PickupBoxes = () => {
   };
 
   const deleteBoxes = () => {
-    console.log("delete");
     for (let i = 0; i < deletedBoxes.length; i++) {
       axios
-        .post(`${baseURL}/box/delete/${deletedBoxes[i]}`)
+        .post(`${url.base}/box/delete/${deletedBoxes[i]}`)
         .then((response) => {
           setError("");
           setIsOpenAlert(true);
@@ -100,9 +110,33 @@ const PickupBoxes = () => {
     }
   };
 
+  const createNewBox = async () => {
+    axios
+      .post(`${url.base}/box`, {
+        name: newBox[0],
+        streetAddress: newBox[1],
+      })
+      .then((response) => {
+        setError("");
+        setIsOpenAlert(true);
+      })
+      .catch((error) => {
+        setError(error.toJSON().message);
+        setIsOpenAlert(true);
+      });
+  };
+
   useEffect(() => {
-    getBoxes();
+    setAuth(JSON.parse(sessionStorage.getItem("user")));
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (auth !== null && auth.userType === "ROLE_DISPATCHER") {
+        getBoxes();
+      }
+    }, 500);
+  }, [auth]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -116,12 +150,24 @@ const PickupBoxes = () => {
           marginX={10}
           marginTop={5}
           sx={{
-            height: "75vh",
+            height: "80vh",
             width: "90%",
           }}
         >
-          <CustomAccordion />
-
+          <CustomAccordion
+            datas={[
+              {
+                title: "Name",
+              },
+              {
+                title: "Address",
+              },
+            ]}
+            newObject={newBox}
+            handleCreate={createNewBox}
+            header={"Add new box"}
+            isTextBoxes={false}
+          />
           <DataGrid
             rows={boxes.map((box) => ({
               id: box.id,
@@ -148,12 +194,11 @@ const PickupBoxes = () => {
           <Box
             display="flex"
             flexDirection="row"
-            my={2}
             justifyContent={"space-between"}
           >
             <Button
               type="delete"
-              sx={{ marginTop: 3, borderRadius: 1 }}
+              sx={{ borderRadius: 1 }}
               variant="contained"
               color="primary"
               style={{
@@ -164,6 +209,7 @@ const PickupBoxes = () => {
               }}
               onClick={() => {
                 setIsOpenDialog(true);
+                window.location.reload(true);
               }}
             >
               {" "}
@@ -198,11 +244,17 @@ const PickupBoxes = () => {
           {isOpenAlert && (
             <Snackbar
               open={isOpenAlert}
-              autoHideDuration={6000}
-              onClose={() => setIsOpenAlert(null)}
+              autoHideDuration={1000}
+              onClose={() => {
+                window.location.reload(true);
+                setIsOpenAlert(null);
+              }}
             >
               <Alert
-                onClose={() => setIsOpenAlert(null)}
+                onClose={() => {
+                  window.location.reload(true);
+                  setIsOpenAlert(null);
+                }}
                 severity={error === "" ? "success" : "error"}
                 sx={{ width: "100%" }}
               >
