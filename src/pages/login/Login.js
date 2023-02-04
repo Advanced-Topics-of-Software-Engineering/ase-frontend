@@ -15,11 +15,13 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import "./Login.css";
 import axios from "axios";
+import { Navigate } from "react-router-dom";
 import url from "../../API";
 
 const Login = () => {
   const [inputs, setInputs] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = React.useState(false);
+  const [redirect, setRedirect] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [error, setError] = useState();
@@ -56,6 +58,7 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <div class="login-background">
           <div class="bg"></div>
+          {redirect && <Navigate to="/home" />}
           <Box
             display="flex"
             flexDirection={"column"}
