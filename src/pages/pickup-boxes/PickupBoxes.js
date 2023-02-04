@@ -47,6 +47,7 @@ const PickupBoxes = () => {
   ]);
 
   const [error, setError] = useState();
+  const [message, setMessage] = useState();
   const [newBox, setNewBox] = useState([]);
   const [updatedBoxes, setUpdatedBoxes] = useState([]);
   const [deletedBoxes, setDeletedBoxes] = useState([]);
@@ -81,12 +82,14 @@ const PickupBoxes = () => {
           streetAddress: updatedBoxes[i].address,
         })
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
           setIsAlertforDelete(false);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
           setIsAlertforDelete(false);
         });
@@ -98,12 +101,14 @@ const PickupBoxes = () => {
       axios
         .post(`${url.base}/box/delete/${deletedBoxes[i]}`)
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
           setIsAlertforDelete(true);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
           setIsAlertforDelete(true);
         });
@@ -246,23 +251,17 @@ const PickupBoxes = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
-                severity={error === "" ? "success" : "error"}
+                severity={error ? "error" : "success"}
                 sx={{ width: "100%" }}
               >
-                {error === ""
-                  ? `Pickup ${deletedBoxes.length > 1 ? "boxes" : "box "} ${
-                      isAlertforDelete ? "deleted" : "updated"
-                    } successfully`
-                  : error}
+                {message}
               </Alert>
             </Snackbar>
           )}
