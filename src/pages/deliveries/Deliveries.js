@@ -62,6 +62,7 @@ const Deliveries = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [error, setError] = useState();
+  const [deletedDeliveries, setDeletedDeliveries] = useState([]);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedDeliveries([...updatedDeliveries, newRow]);
@@ -117,6 +118,22 @@ const Deliveries = () => {
     }
   };
 
+  const deleteDeliveries = () => {
+    for (let i = 0; i < deletedDeliveries.length; i++) {
+      axios
+        .post(`${baseURL}/box/delete/${deletedDeliveries[i]}`)
+        .then((response) => {
+          console.log(response.status);
+          setError("");
+          setIsOpenAlert(true);
+        })
+        .catch((error) => {
+          setError(error.toJSON().message);
+          setIsOpenAlert(true);
+        });
+    }
+  };
+
   useEffect(() => {
     getDeliveries();
   }, []);
@@ -152,6 +169,7 @@ const Deliveries = () => {
             disableSelectionOnClick
             disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
+            onSelectionModelChange={(itm) => setDeletedDeliveries(itm)}
             processRowUpdate={handleProcessRowUpdate}
             style={{
               marginTop: 10,
@@ -161,22 +179,49 @@ const Deliveries = () => {
               boxShadow: "5",
             }}
           />
-          <Button
-            type="submit"
-            sx={{ borderRadius: 1 }}
-            variant="contained"
-            color="primary"
-            style={{
-              height: "40px",
-              width: "200px",
-              marginTop: "10px",
-            }}
-            onClick={() => {
-              setIsOpenDialog(true);
-            }}
+          <Box
+            display="flex"
+            flexDirection="row"
+            my={2}
+            justifyContent={"space-between"}
           >
-            Submit Changes
-          </Button>
+            <Button
+              type="delete"
+              sx={{ marginTop: 3, borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "250px",
+                marginTop: "10px",
+                marginRight: "30px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+              }}
+            >
+              {" "}
+              Delete Selected {deletedDeliveries.length > 1
+                ? "Items"
+                : "Item"}{" "}
+            </Button>
+            <Button
+              type="submit"
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "200px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+              }}
+            >
+              Submit Changes
+            </Button>
+          </Box>
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
@@ -195,6 +240,27 @@ const Deliveries = () => {
                 sx={{ width: "100%" }}
               >
                 {error === "" ? "Values successfully changed" : error}
+              </Alert>
+            </Snackbar>
+          )}
+          <ResponsiveDialog
+            isOpen={isOpenDialog}
+            handleClose={() => setIsOpenDialog(false)}
+            title="Are you sure?"
+            handleYesClick={deleteDeliveries}
+          />
+          {isOpenAlert && (
+            <Snackbar
+              open={isOpenAlert}
+              autoHideDuration={6000}
+              onClose={() => setIsOpenAlert(null)}
+            >
+              <Alert
+                onClose={() => setIsOpenAlert(null)}
+                severity={error === "" ? "success" : "error"}
+                sx={{ width: "100%" }}
+              >
+                {error === "" ? "Values successfully deleted" : error}
               </Alert>
             </Snackbar>
           )}

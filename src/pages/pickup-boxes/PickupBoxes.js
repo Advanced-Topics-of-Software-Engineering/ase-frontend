@@ -32,6 +32,7 @@ const PickupBoxes = () => {
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [error, setError] = useState();
+  const [deletedBoxes, setDeletedBoxes] = useState([]);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedBoxes([...updatedBoxes, newRow]);
@@ -77,6 +78,22 @@ const PickupBoxes = () => {
     }
   };
 
+  const deleteBoxes = () => {
+    for (let i = 0; i < deletedBoxes.length; i++) {
+      axios
+        .post(`${baseURL}/box/delete/${deletedBoxes[i]}`)
+        .then((response) => {
+          console.log(response.status);
+          setError("");
+          setIsOpenAlert(true);
+        })
+        .catch((error) => {
+          setError(error.toJSON().message);
+          setIsOpenAlert(true);
+        });
+    }
+  };
+
   useEffect(() => {
     getBoxes();
   }, []);
@@ -98,6 +115,7 @@ const PickupBoxes = () => {
           }}
         >
           <CustomAccordion />
+
           <DataGrid
             rows={boxes.map((box) => ({
               id: box.id,
@@ -108,7 +126,9 @@ const PickupBoxes = () => {
             editMode="row"
             pageSize={7}
             disableSelectionOnClick
+            checkboxSelection
             experimentalFeatures={{ newEditingApi: true }}
+            onSelectionModelChange={(itm) => setDeletedBoxes(itm)}
             processRowUpdate={handleProcessRowUpdate}
             style={{
               marginTop: 10,
@@ -118,22 +138,48 @@ const PickupBoxes = () => {
               boxShadow: "5",
             }}
           />
-          <Button
-            type="submit"
-            sx={{ borderRadius: 1 }}
-            variant="contained"
-            color="primary"
-            style={{
-              height: "40px",
-              width: "200px",
-              marginTop: "10px",
-            }}
-            onClick={() => {
-              setIsOpenDialog(true);
-            }}
+          <Box
+            display="flex"
+            flexDirection="row"
+            my={2}
+            justifyContent={"space-between"}
           >
-            Submit Changes
-          </Button>
+            <Button
+              type="delete"
+              sx={{ marginTop: 3, borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "260px",
+                marginTop: "10px",
+                marginRight: "30px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+              }}
+            >
+              {" "}
+              Delete Selected {deletedBoxes.length > 1 ? "Items" : "Item"}{" "}
+            </Button>
+            <Button
+              type="submit"
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "200px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+              }}
+            >
+              Submit Changes
+            </Button>
+          </Box>
+
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
@@ -152,6 +198,27 @@ const PickupBoxes = () => {
                 sx={{ width: "100%" }}
               >
                 {error === "" ? "Values successfully changed" : error}
+              </Alert>
+            </Snackbar>
+          )}
+          <ResponsiveDialog
+            isOpen={isOpenDialog}
+            handleClose={() => setIsOpenDialog(false)}
+            title="Are you sure?"
+            handleYesClick={deleteBoxes}
+          />
+          {isOpenAlert && (
+            <Snackbar
+              open={isOpenAlert}
+              autoHideDuration={6000}
+              onClose={() => setIsOpenAlert(null)}
+            >
+              <Alert
+                onClose={() => setIsOpenAlert(null)}
+                severity={error === "" ? "success" : "error"}
+                sx={{ width: "100%" }}
+              >
+                {error === "" ? "Values successfully deleted" : error}
               </Alert>
             </Snackbar>
           )}
