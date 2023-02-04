@@ -11,139 +11,79 @@ import ResponsiveDialog from "../ResponsiveDialog";
 
 const columns = [
   { field: "id", headerName: "ID", flex: 1 },
-  {
-    field: "username",
-    headerName: "Username",
-    flex: 0.5,
-    editable: true,
-    sortable: false,
-  },
-  {
-    field: "email",
-    headerName: "Email",
-    flex: 0.7,
-    editable: true,
-    sortable: false,
-  },
-  {
-    field: "rfidtoken",
-    headerName: "RFID Token",
-    flex: 1,
-    editable: true,
-    sortable: false,
-  },
-  {
-    field: "role",
-    headerName: "User Type",
-    flex: 0.3,
-    editable: true,
-    sortable: false,
-  },
-  {
-    field: "password",
-    headerName: "Password",
-    flex: 0.5,
-    editable: true,
-    sortable: false,
-  },
+  { field: "trackingCode", headerName: "Tracking Code", flex: 1 },
+  { field: "customer", headerName: "Assigned Customer", flex: 1 },
+  { field: "boxName", headerName: "Assigned Box Name", flex: 1 },
+  { field: "boxAddress", headerName: "Assigned Box Address", flex: 1 },
+  { field: "status", headerName: "Status", flex: 1, editable: true },
 ];
 
-function setRole(role) {
-  if (role === "ROLE_DISPATHCER") {
-    return "dispatcher";
-  } else if (role === "ROLE_CUSTOMER") {
-    return "customer";
-  } else if (role === "ROLE_DELIVERER") {
-    return "deliverer";
-  }
-}
-
-const Customer = () => {
-  const [customers, setCustomer] = useState([
+const UserDeliveries = () => {
+  const [deliveries, setDeliveries] = useState([
     {
       id: "",
-      email: "",
-      rfidtoken: "",
-      username: "",
-      role: "",
-      password: "",
+      status: "",
+      trackingID: "",
+      box: {
+        id: "",
+        name: "",
+      },
+      customer: {
+        id: "",
+        username: "",
+      },
+      deliverer: {
+        id: "",
+        username: "",
+      },
     },
   ]);
-  const [updatedCustomers, setUpdatedCustomers] = useState([]);
+  const [updatedDeliveries, setUpdatedDeliveries] = useState([]);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [error, setError] = useState();
-  const [auth, setAuth] = useState([
-    {
-      accessToken: "",
-      email: "",
-      id: "",
-      tokenType: "",
-      userType: "",
-      username: "",
-    },
-  ]);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
-    setUpdatedCustomers([...updatedCustomers, newRow]);
+    setUpdatedDeliveries([...updatedDeliveries, newRow]);
   };
 
-  const getCustomers = () => {
+  const getDeliveries = async () => {
     axios
-      .get(`${url.auth}/dispatcher/get_all_customers`, {
+      .get(`${url.base}/delivery`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
       })
       .then((response) => {
-        setCustomer(response.data);
+        setDeliveries(response.data);
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
-  const updateCustomers = () => {
-    for (let i = 0; i < updatedCustomers.length; i++) {
+  const updateDeliveries = async () => {
+    for (let i = 0; i < updatedDeliveries.length; i++) {
       axios
-        .post(
-          `${url.auth}/dispatcher/edit_user/${updatedCustomers[i].id}`,
-          {
-            username: updatedCustomers[i].username,
-            email: updatedCustomers[i].email,
-            password: updatedCustomers[i].password,
-          },
-          {
-            headers: {
-              "ngrok-skip-browser-warning": "ase",
-              Authorization: `Bearer ${auth.accessToken}`,
-            },
-          }
-        )
+        .post(`${url.base}/delivery/update/${updatedDeliveries[i].id}`, {
+          status: updatedDeliveries[i].status,
+        })
         .then((response) => {
           setError("");
           setIsOpenAlert(true);
-          getCustomers();
         })
         .catch((error) => {
-          setError(error.response.data.message);
+          setError(error.toJSON().message);
           setIsOpenAlert(true);
         });
     }
   };
 
   useEffect(() => {
-    setAuth(JSON.parse(sessionStorage.getItem("user")));
-  }, []);
-
-  useEffect(() => {
     setTimeout(() => {
-      if (auth !== null && auth.userType === "ROLE_DISPATCHER") {
-        getCustomers();
-      }
+      getDeliveries();
     }, 500);
-  }, [auth]);
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -158,34 +98,28 @@ const Customer = () => {
           marginTop={5}
           sx={{ height: "80vh", width: "90%" }}
         >
-          <Button
-            fullWidth
-            sx={{ borderRadius: 1 }}
-            variant="contained"
-            href={"/sign-up"}
-            style={{
-              fontSize: "23px",
-              justifyContent: "flex-start",
-              backgroundColor: "#ae93b8",
-            }}
-          >
-            Add New User
-          </Button>
           <DataGrid
-            rows={customers.map((customer) => ({
-              id: customer.id,
-              username: customer.username,
-              email: customer.email,
-              rfidtoken: customer.rfidtoken,
-              role: setRole(customer.role),
+            rows={deliveries.map((delivery, idx) => ({
+              id: delivery.id,
+              status: delivery.status,
+              trackingID: delivery.trackingID,
+              boxName: delivery.box.name,
+              boxAddress: delivery.box.streetAddress,
+              customerId: delivery.customer.id,
+              delivererId: delivery.deliverer.id,
+              boxID: delivery.box.id,
             }))}
             columns={columns}
             editMode="row"
-            rowsPerPageOptions={[7]}
+            pageSize={7}
             disableSelectionOnClick
+            disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
             processRowUpdate={handleProcessRowUpdate}
-            style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
+            style={{
+              marginTop: 10,
+              backgroundColor: "#fcfbfa",
+            }}
             sx={{
               boxShadow: "5",
             }}
@@ -210,7 +144,7 @@ const Customer = () => {
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
-            handleYesClick={updateCustomers}
+            handleYesClick={updateDeliveries}
           />
           {isOpenAlert && (
             <Snackbar
@@ -239,4 +173,4 @@ const Customer = () => {
   );
 };
 
-export default Customer;
+export default UserDeliveries;

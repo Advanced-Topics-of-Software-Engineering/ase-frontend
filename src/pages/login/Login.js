@@ -6,18 +6,25 @@ import {
   Typography,
   IconButton,
   InputAdornment,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import "./Login.css";
+import axios from "axios";
+import { Navigate } from "react-router-dom";
+import url from "../../API";
 
 const Login = () => {
-  const [inputs, setInputs] = useState({ email: "", password: "" });
+  const [inputs, setInputs] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = React.useState(false);
-
+  const [redirect, setRedirect] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [error, setError] = useState();
 
   const handleChange = (e) => {
     setInputs((prevState) => ({
@@ -28,7 +35,22 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(inputs);
+
+    axios
+      .post(`${url.auth}/api/auth/signin`, {
+        username: inputs.username,
+        password: inputs.password,
+      })
+      .then((response) => {
+        if (response.data.accessToken) {
+          sessionStorage.setItem("user", JSON.stringify(response.data));
+          setRedirect(true);
+        }
+      })
+      .catch((error) => {
+        setError(error.toJSON().message);
+        setIsOpenAlert(true);
+      });
   };
 
   return (
@@ -36,6 +58,7 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <div class="login-background">
           <div class="bg"></div>
+          {redirect && <Navigate to="/home" />}
           <Box
             display="flex"
             flexDirection={"column"}
@@ -65,12 +88,12 @@ const Login = () => {
               fullWidth
               required
               onChange={handleChange}
-              name="email"
-              value={inputs.email}
+              name="username"
+              value={inputs.username}
               margin="normal"
-              type={"email"}
+              type={"text"}
               variant="outlined"
-              label="email"
+              label="username"
               InputProps={{
                 classes: {
                   notchedOutline: "input-border",
@@ -138,6 +161,25 @@ const Login = () => {
             >
               Login
             </Button>
+            {isOpenAlert && (
+              <Snackbar
+                open={isOpenAlert}
+                autoHideDuration={1000}
+                onClose={() => {
+                  setIsOpenAlert(null);
+                }}
+              >
+                <Alert
+                  onClose={() => {
+                    setIsOpenAlert(null);
+                  }}
+                  severity={"error"}
+                  sx={{ width: "100%" }}
+                >
+                  {error}
+                </Alert>
+              </Snackbar>
+            )}
           </Box>
         </div>
       </form>

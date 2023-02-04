@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Container,
@@ -7,24 +7,42 @@ import {
   Box,
   AppBar,
 } from "@mui/material";
-import AdbIcon from "@mui/icons-material/Adb";
 
-const pages = [
+const dispatcherTabs = [
+  {
+    name: "Dispatchers",
+    endpoint: "dispatchers",
+  },
+  { name: "Customers", endpoint: "customers" },
   {
     name: "Deliverers",
     endpoint: "deliverers",
   },
-  { name: "Customers", endpoint: "customers" },
   { name: "Pickup Boxes", endpoint: "pickup-boxes" },
   {
     name: "Deliveries",
     endpoint: "deliveries",
-    name: "Add new user",
-    endpoint: "sign-up",
+  },
+];
+
+const userTabs = [
+  {
+    name: "Deliveries",
+    endpoint: "user-deliveries",
   },
 ];
 
 function Header() {
+  const [userType, setUserType] = useState("");
+
+  useEffect(() => {
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    console.log("header", user);
+    if (user !== null) {
+      setUserType(user.userType);
+    }
+  });
+
   return (
     <AppBar position="static">
       <Container maxWidth="xl">
@@ -46,38 +64,46 @@ function Header() {
           >
             ASE - 23
           </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}></Box>
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href=""
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontFamily: "monospace",
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            LOGO
-          </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                href={page.endpoint}
-                sx={{ my: 2, mx: 3, color: "white", display: "block" }}
-              >
-                {page.name}
-              </Button>
-            ))}
+            {userType === "ROLE_DISPATCHER"
+              ? dispatcherTabs.map((tab, index) => (
+                  <Button
+                    key={index}
+                    href={tab.endpoint}
+                    sx={{ my: 2, mx: 4, color: "white", display: "block" }}
+                  >
+                    {tab.name}
+                  </Button>
+                ))
+              : userType === ("ROLE_DELIVERER" || "ROLE_CUSTOMER") &&
+                userTabs.map((tab, index) => (
+                  <Button
+                    key={index}
+                    href={tab.endpoint}
+                    sx={{ my: 2, mx: 4, color: "white", display: "block" }}
+                  >
+                    {tab.name}
+                  </Button>
+                ))}
           </Box>
+          {userType !== "" ? (
+            <Button
+              href={"/"}
+              onClick={() => {
+                sessionStorage.clear();
+              }}
+              sx={{ color: "white", justifyContent: "flex-end" }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button
+              href={"/home"}
+              sx={{ color: "white", justifyContent: "flex-end" }}
+            >
+              Login
+            </Button>
+          )}
         </Toolbar>
       </Container>
     </AppBar>

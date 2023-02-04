@@ -10,21 +10,28 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import "./Register.css";
+import Header from "../Header";
+import axios from "axios";
+import url from "../../API";
 
 const Register = () => {
   const [inputs, setInputs] = useState({
-    rfidToken: "",
     email: "",
     password: "",
+    username: "",
   });
-  const [userType, setUserType] = useState();
+  const [userType, setUserType] = useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+  const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [error, setError] = useState();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -35,14 +42,42 @@ const Register = () => {
     }));
   };
 
+  const handleUserTypeChange = (e) => {
+    setUserType(e.target.value);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(inputs);
+    axios
+      .post(
+        `${url.auth}/api/auth/signup`,
+        {
+          username: inputs.username,
+          email: inputs.email,
+          userType: userType,
+          password: inputs.password,
+        },
+        {
+          headers: {
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZ2VoYW5fdGVzdCIsImlhdCI6MTY3NTUwNjIxOSwiZXhwIjoxNjc1NTkyNjE5fQ.6qnpQkgn2V5KaEQYCqkti8A176wLnD_V7DgAhehxflg",
+          },
+        }
+      )
+      .then((response) => {
+        setError("");
+        setIsOpenAlert(true);
+      })
+      .catch((error) => {
+        setError(error.response.data.message);
+        setIsOpenAlert(true);
+      });
   };
 
   return (
     <ThemeProvider theme={theme}>
       <form onSubmit={handleSubmit}>
+        <Header />
         <div class="register-background">
           <div class="bg"></div>
           <Box
@@ -52,7 +87,7 @@ const Register = () => {
             alignItems="center"
             justifyContent={"center"}
             margin={"auto"}
-            padding={10}
+            padding={5}
             borderRadius={5}
             boxShadow={"5px 5px 10px #ccc"}
             backgroundColor="#fcfceb"
@@ -63,7 +98,7 @@ const Register = () => {
             }}
           >
             <Typography
-              marginBottom={"30px"}
+              marginBottom={"20px"}
               variant="title"
               color="#660090"
               textAlign="center"
@@ -96,12 +131,12 @@ const Register = () => {
               fullWidth
               required
               onChange={handleChange}
-              name="rfidToken"
-              value={inputs.rfidToken}
+              name="username"
+              value={inputs.username}
               margin="normal"
               type={"text"}
               variant="outlined"
-              label="rfid token"
+              label="username"
               InputProps={{
                 classes: {
                   notchedOutline: "input-border",
@@ -161,8 +196,7 @@ const Register = () => {
               <Select
                 variant="outlined"
                 value={userType}
-                onChange={handleChange}
-                autoWidth
+                onChange={handleUserTypeChange}
                 label="user type"
                 sx={{
                   ".MuiOutlinedInput-notchedOutline": {
@@ -182,23 +216,39 @@ const Register = () => {
                   },
                 }}
               >
-                <MenuItem value="Deliverer">Deliverer</MenuItem>
-                <MenuItem value="Customer">Customer</MenuItem>
+                <MenuItem value="ROLE_DELIVERER">deliverer</MenuItem>
+                <MenuItem value="ROLE_CUSTOMER">customer</MenuItem>
+                <MenuItem value="ROLE_DISPATCHER">dispatcher</MenuItem>
               </Select>
             </FormControl>
             <Button
               type="submit"
-              sx={{ marginTop: 3, borderRadius: 3 }}
+              sx={{ borderRadius: 3 }}
               variant="contained"
               color="primary"
               style={{
                 height: "40px",
                 width: "140px",
-                marginTop: "50px",
+                marginTop: "20px",
               }}
             >
               Register
             </Button>
+            {isOpenAlert && (
+              <Snackbar
+                open={isOpenAlert}
+                autoHideDuration={3000}
+                onClose={() => setIsOpenAlert(null)}
+              >
+                <Alert
+                  onClose={() => setIsOpenAlert(null)}
+                  severity={"error"}
+                  sx={{ width: "100%" }}
+                >
+                  {error}
+                </Alert>
+              </Snackbar>
+            )}
           </Box>
         </div>
       </form>
