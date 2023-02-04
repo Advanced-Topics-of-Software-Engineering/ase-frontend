@@ -19,13 +19,13 @@ function App() {
         <Route exact path="/" element={<Login />} />
         <Route exact path="/dispatcher" element={<Dispatcher />} />
         <Route exact path="/home" element={<Home />} />
+        <Route exact path="/sign-up" element={<Register />} />
         <Route exact path="/user-deliveries" element={<UserDeliveries />} />
         <Route exact path="/dispatchers" element={<Dispatcher />} />
         <Route exact path="/customers" element={<Customer />} />
         <Route exact path="/deliverers" element={<Deliverer />} />
         <Route exact path="/deliveries" element={<Deliveries />} />
         <Route exact path="/pickup-boxes" element={<PickupBoxes />} />
-        <Route exact path="/sign-up" element={<Register />} />
       </Routes>
     </Router>
   );

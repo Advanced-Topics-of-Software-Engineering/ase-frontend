@@ -10,6 +10,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
@@ -18,16 +20,18 @@ import theme from "../../theme/Theme";
 import "./Register.css";
 import Header from "../Header";
 import axios from "axios";
+import url from "../../API";
 
 const Register = () => {
   const [inputs, setInputs] = useState({
-    rfidToken: "",
     email: "",
     password: "",
     username: "",
   });
   const [userType, setUserType] = useState("");
   const [showPassword, setShowPassword] = React.useState(false);
+  const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [error, setError] = useState();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
@@ -44,25 +48,29 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const user = {
-      username: inputs.username,
-      email: inputs.email,
-      userType: userType,
-      password: inputs.password,
-      rfidToken: inputs.rfidToken,
-    };
     axios
-      .post("https://7cce-138-246-3-200.eu.ngrok.io/api/auth/signup", user, {
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZ2VoYW5fdGVzdCIsImlhdCI6MTY3NTM2OTA1NiwiZXhwIjoxNjc1NDU1NDU2fQ.SsZItShrBnsf84wo12QqVNfHva8cA2cJM8jZts_x2uM",
+      .post(
+        `${url.auth}/api/auth/signup`,
+        {
+          username: inputs.username,
+          email: inputs.email,
+          userType: userType,
+          password: inputs.password,
         },
-      })
+        {
+          headers: {
+            Authorization:
+              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZ2VoYW5fdGVzdCIsImlhdCI6MTY3NTUwNjIxOSwiZXhwIjoxNjc1NTkyNjE5fQ.6qnpQkgn2V5KaEQYCqkti8A176wLnD_V7DgAhehxflg",
+          },
+        }
+      )
       .then((response) => {
-        console.log(response.status);
+        setError("");
+        setIsOpenAlert(true);
       })
       .catch((error) => {
-        console.error(error);
+        setError(error.response.data.message);
+        setIsOpenAlert(true);
       });
   };
 
@@ -183,35 +191,12 @@ const Register = () => {
               variant="outlined"
               label="password"
             />
-            <TextField
-              fullWidth
-              required
-              onChange={handleChange}
-              name="rfidToken"
-              value={inputs.rfidToken}
-              margin="normal"
-              type={"text"}
-              variant="outlined"
-              label="rfid token"
-              InputProps={{
-                classes: {
-                  notchedOutline: "input-border",
-                },
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: "inputLabel",
-                  focused: "inputLabel",
-                },
-              }}
-            />
             <FormControl fullWidth required margin="normal" variant="outlined">
               <InputLabel style={{ color: "#660090" }}>user type</InputLabel>
               <Select
                 variant="outlined"
                 value={userType}
                 onChange={handleUserTypeChange}
-                autoWidth
                 label="user type"
                 sx={{
                   ".MuiOutlinedInput-notchedOutline": {
@@ -233,6 +218,7 @@ const Register = () => {
               >
                 <MenuItem value="ROLE_DELIVERER">deliverer</MenuItem>
                 <MenuItem value="ROLE_CUSTOMER">customer</MenuItem>
+                <MenuItem value="ROLE_DISPATCHER">dispatcher</MenuItem>
               </Select>
             </FormControl>
             <Button
@@ -248,6 +234,21 @@ const Register = () => {
             >
               Register
             </Button>
+            {isOpenAlert && (
+              <Snackbar
+                open={isOpenAlert}
+                autoHideDuration={3000}
+                onClose={() => setIsOpenAlert(null)}
+              >
+                <Alert
+                  onClose={() => setIsOpenAlert(null)}
+                  severity={"error"}
+                  sx={{ width: "100%" }}
+                >
+                  {error}
+                </Alert>
+              </Snackbar>
+            )}
           </Box>
         </div>
       </form>
