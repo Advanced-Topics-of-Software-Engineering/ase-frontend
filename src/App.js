@@ -9,6 +9,7 @@ import Deliverer from "./pages/deliverer/Deliverer";
 import Deliveries from "./pages/deliveries/Deliveries";
 import PickupBoxes from "./pages/pickup-boxes/PickupBoxes";
 import Register from "./pages/register/Register";
+import Home from "./pages/home/Home";
 import Dispatcher from "./pages/dispatcher/Dispatcher";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
       <Routes>
         <Route exact path="/" element={<Login />} />
         <Route exact path="/dispatcher" element={<Dispatcher />} />
+        <Route exact path="/home" element={<Home />} />
         <Route exact path="/user-deliveries" element={<UserDeliveries />} />
         <Route exact path="/dispatchers" element={<Dispatcher />} />
         <Route exact path="/customers" element={<Customer />} />
