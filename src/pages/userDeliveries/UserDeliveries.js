@@ -151,13 +151,12 @@ const UserDeliveries = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
+                window.location.reload(true);
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
                 severity={error === "" ? "success" : "error"}

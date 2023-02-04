@@ -214,7 +214,6 @@ const PickupBoxes = () => {
               }}
               onClick={() => {
                 setIsOpenDialog(true);
-                window.location.reload(true);
               }}
             >
               {" "}
@@ -252,6 +251,7 @@ const PickupBoxes = () => {
               autoHideDuration={1000}
               onClose={() => {
                 setIsOpenAlert(null);
+                window.location.reload(true);
               }}
             >
               <Alert

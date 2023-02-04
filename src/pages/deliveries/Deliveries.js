@@ -89,6 +89,7 @@ const Deliveries = () => {
   ]);
 
   const [error, setError] = useState();
+  const [message, setMessage] = useState();
   const [boxes, setBoxes] = useState([{}]);
   const [customers, setCustomers] = useState([{}]);
   const [deliverers, setDeliverers] = useState([{}]);
@@ -328,7 +329,6 @@ const Deliveries = () => {
               }}
               onClick={() => {
                 setIsOpenDialog(true);
-                window.location.reload(true);
               }}
             >
               {" "}
@@ -366,13 +366,12 @@ const Deliveries = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
+                window.location.reload(true);
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
                 severity={error === "" ? "success" : "error"}

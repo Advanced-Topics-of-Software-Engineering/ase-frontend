@@ -81,6 +81,7 @@ const Deliverer = () => {
   ]);
 
   const [error, setError] = useState();
+  const [message, setMessage] = useState();
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [updatedDeliverers, setUpdatedDeliverers] = useState([]);
@@ -93,7 +94,7 @@ const Deliverer = () => {
 
   const getDeliverers = () => {
     axios
-      .get(`${url.auth}/dispatcher/get_all_deliverers`, {
+      .get(`${url.base}/dispatcher/get_all_deliverers`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
@@ -126,12 +127,14 @@ const Deliverer = () => {
           }
         )
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
           setIsAlertforDelete(false);
         })
         .catch((error) => {
-          setError(error.response.data.message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
           setIsAlertforDelete(false);
         });
@@ -143,12 +146,14 @@ const Deliverer = () => {
       axios
         .post(`${url.base}/delivery/delete/${deletedDeliverers[i]}`)
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
           setIsAlertforDelete(true);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
           setIsAlertforDelete(true);
         });
@@ -245,42 +250,12 @@ const Deliverer = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
+                window.location.reload(true);
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
-                  setIsOpenAlert(null);
-                }}
-                severity={error === "" ? "success" : "error"}
-                sx={{ width: "100%" }}
-              >
-                {error === "" ? "Values successfully changed" : error}
-              </Alert>
-            </Snackbar>
-          )}
-          <ResponsiveDialog
-            isOpen={isOpenDialog}
-            handleClose={() => setIsOpenDialog(false)}
-            title="Are you sure?"
-            handleYesClick={() => {
-              isAlertforDelete ? updateDeliverers() : deleteDeliverers();
-            }}
-          />
-          {isOpenAlert && (
-            <Snackbar
-              open={isOpenAlert}
-              autoHideDuration={1000}
-              onClose={() => {
-                window.location.reload(true);
-                setIsOpenAlert(null);
-              }}
-            >
-              <Alert
-                onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
                 severity={error === "" ? "success" : "error"}

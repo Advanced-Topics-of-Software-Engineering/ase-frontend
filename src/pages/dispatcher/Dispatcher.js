@@ -75,9 +75,12 @@ const Dispatcher = () => {
   ]);
 
   const [error, setError] = useState();
+  const [message, setMessage] = useState();
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [updatedDispatchers, setUpdatedDispatchers] = useState([]);
   const [deletedDispatchers, setDeletedDispatchers] = useState([]);
+  const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
   const getDispatchers = () => {
     axios
@@ -95,17 +98,44 @@ const Dispatcher = () => {
       });
   };
 
+  const updateDispatchers = async () => {
+    for (let i = 0; i < updatedDispatchers.length; i++) {
+      axios
+        .post(`${url.base}/dispatcher/edit_user/${updatedDispatchers[i].id}`, {
+          username: updatedDispatchers[i].username,
+          email: updatedDispatchers[i].email,
+          password: updatedDispatchers[i].password,
+        })
+        .then((response) => {
+          setMessage(response.data.message);
+          setError(false);
+          setIsOpenAlert(true);
+          setIsAlertforDelete(false);
+        })
+        .catch((error) => {
+          setMessage(error.response.data.message);
+          setError(true);
+          setIsOpenAlert(true);
+          setIsAlertforDelete(false);
+        });
+    }
+  };
+
   const deleteDispatchers = () => {
     for (let i = 0; i < deletedDispatchers.length; i++) {
       axios
         .post(`${url.base}/delivery/delete/${deletedDispatchers[i]}`)
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
+          setIsAlertforDelete(true);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
+          setIsAlertforDelete(true);
         });
     }
   };
@@ -169,39 +199,13 @@ const Dispatcher = () => {
               boxShadow: "5",
             }}
           />
-          <ResponsiveDialog
-            isOpen={isOpenDialog}
-            handleClose={() => setIsOpenDialog(false)}
-            title="Are you sure?"
-            handleYesClick={deletedDispatchers}
-          />
-          {isOpenAlert && (
-            <Snackbar
-              open={isOpenAlert}
-              autoHideDuration={1000}
-              onClose={() => {
-                window.location.reload(true);
-                setIsOpenAlert(null);
-              }}
-            >
-              <Alert
-                onClose={() => {
-                  window.location.reload(true);
-                  setIsOpenAlert(null);
-                }}
-                severity={error === "" ? "success" : "error"}
-                sx={{ width: "100%" }}
-              >
-                {error === "" ? "Values successfully changed" : error}
-              </Alert>
-            </Snackbar>
-          )}
+
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              deletedDispatchers();
+              isAlertforDelete ? updateDispatchers() : deleteDispatchers();
             }}
           />
           {isOpenAlert && (
@@ -209,26 +213,18 @@ const Dispatcher = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
+                window.location.reload(true);
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
-                severity={error === "" ? "success" : "error"}
+                severity={error ? "error" : "success"}
                 sx={{ width: "100%" }}
               >
-                {error === ""
-                  ? `${
-                      deletedDispatchers.length > 1
-                        ? "Dispathcers"
-                        : "Dispatchers"
-                    } 
-                      deleted successfully`
-                  : error}
+                {message}
               </Alert>
             </Snackbar>
           )}

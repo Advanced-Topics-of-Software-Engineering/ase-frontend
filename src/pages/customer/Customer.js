@@ -72,6 +72,7 @@ const Customer = () => {
   const [updatedCustomers, setUpdatedCustomers] = useState([]);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [message, setMessage] = useState();
   const [error, setError] = useState();
   const [auth, setAuth] = useState([
     {
@@ -90,11 +91,12 @@ const Customer = () => {
 
   const getCustomers = () => {
     axios
-      .get(`${url.auth}/dispatcher/get_all_customers`, {
+      .get(`${url.base}/dispatcher/get_all_customers`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
         },
+        method: "GET",
       })
       .then((response) => {
         setCustomer(response.data);
@@ -122,13 +124,14 @@ const Customer = () => {
           }
         )
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
           setIsOpenAlert(true);
-          getCustomers();
+          setError(false);
         })
         .catch((error) => {
-          setError(error.response.data.message);
+          setMessage(error.response.data.message);
           setIsOpenAlert(true);
+          setError(true);
         });
     }
   };
@@ -217,19 +220,17 @@ const Customer = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
-                severity={error === "" ? "success" : "error"}
+                severity={error ? "error" : "success"}
                 sx={{ width: "100%" }}
               >
-                {error === "" ? "Values successfully changed" : error}
+                {message}
               </Alert>
             </Snackbar>
           )}
