@@ -19,25 +19,18 @@ const columns = [
 ];
 
 const UserDeliveries = () => {
-  const [deliveries, setDeliveries] = useState([
+  const [auth, setAuth] = useState([
     {
+      accessToken: "",
+      email: "",
       id: "",
-      status: "",
-      trackingID: "",
-      box: {
-        id: "",
-        name: "",
-      },
-      customer: {
-        id: "",
-        username: "",
-      },
-      deliverer: {
-        id: "",
-        username: "",
-      },
+      tokenType: "",
+      userType: "",
+      username: "",
     },
   ]);
+
+  const [deliveries, setDeliveries] = useState([]);
   const [updatedDeliveries, setUpdatedDeliveries] = useState([]);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
@@ -47,11 +40,28 @@ const UserDeliveries = () => {
     setUpdatedDeliveries([...updatedDeliveries, newRow]);
   };
 
-  const getDeliveries = async () => {
+  const getDeliveriesForDeliverer = async () => {
     axios
-      .get(`${url.base}/delivery`, {
+      .get(`${url.base}/deliverer/${auth.id}`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
+      .then((response) => {
+        setDeliveries(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const getDeliveriesForCustomer = async () => {
+    axios
+      .get(`${url.base}/customer/${auth.id}`, {
+        headers: {
+          "ngrok-skip-browser-warning": "ase",
+          Authorization: `Bearer ${auth.accessToken}`,
         },
       })
       .then((response) => {
@@ -80,10 +90,18 @@ const UserDeliveries = () => {
   };
 
   useEffect(() => {
-    setTimeout(() => {
-      getDeliveries();
-    }, 100);
+    setAuth(JSON.parse(sessionStorage.getItem("user")));
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (auth !== null && auth.userType === "ROLE_DELIVERER") {
+        getDeliveriesForDeliverer();
+      } else if (auth !== null && auth.userType === "ROLE_CUSTOMER") {
+        getDeliveriesForCustomer();
+      }
+    }, 100);
+  }, [auth]);
 
   return (
     <ThemeProvider theme={theme}>
