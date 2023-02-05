@@ -195,7 +195,7 @@ function Profile() {
               <Input
                 onChange={handleChange}
                 name="oldPassword"
-                label="old password"
+                label="password"
                 required={true}
                 isSecured={true}
               />
@@ -208,7 +208,7 @@ function Profile() {
               <Input
                 onChange={handleChange}
                 name="oldPassword"
-                label="old password"
+                label="current password"
                 required={true}
                 isSecured={true}
               />

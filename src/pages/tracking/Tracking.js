@@ -114,8 +114,8 @@ const Tracking = () => {
           justifyContent={"center"}
           flexDirection="column"
           marginX={10}
-          marginTop={5}
-          sx={{ height: "80vh", width: "90%" }}
+          marginTop={10}
+          sx={{ height: "50vh", width: "90%" }}
         >
           <Box
             borderRadius={1}
