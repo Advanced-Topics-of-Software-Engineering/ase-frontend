@@ -15,13 +15,13 @@ export default function CustomPopover({ code }) {
   return (
     <div>
       <Button
-        style={{ height: "30px", width: "80px", fontSize: "15px" }}
+        style={{ height: "30px", width: "110px", fontSize: "15px" }}
         variant="contained"
         onClick={(event) => {
           setAnchorEl(event.currentTarget);
         }}
       >
-        Open QR
+        Update Status
       </Button>
       <Popover
         id={id}

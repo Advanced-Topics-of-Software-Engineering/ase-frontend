@@ -30,10 +30,11 @@ const UserDeliveries = () => {
 
   const columns = [
     { field: "id", headerName: "ID", flex: 1 },
-    { field: "trackingID", headerName: "Tracking Id", flex: 1 },
-    { field: "customer", headerName: "Assigned Customer", flex: 1 },
-    { field: "boxName", headerName: "Assigned Box Name", flex: 1 },
-    { field: "boxAddress", headerName: "Assigned Box Address", flex: 1 },
+    { field: "trackingID", headerName: "Tracking ID", flex: 1 },
+    { field: "customerID", headerName: "Customer ID", flex: 1 },
+    { field: "delivererID", headerName: "Deliverer ID", flex: 1 },
+    { field: "boxName", headerName: "Box Name", flex: 0.7 },
+    { field: "boxAddress", headerName: "Box Address", flex: 1 },
     { field: "status", headerName: "Status", flex: 1, editable: true },
     {
       field: "qrCode",
@@ -143,8 +144,8 @@ const UserDeliveries = () => {
               trackingID: delivery.trackingID,
               boxName: delivery.box.name,
               boxAddress: delivery.box.streetAddress,
-              customerId: delivery.customerID,
-              delivererId: delivery.delivererID,
+              customerID: delivery.customerID,
+              delivererID: delivery.delivererID,
               boxID: delivery.box.id,
               qrCode: delivery.trackingID,
             }))}

@@ -33,12 +33,12 @@ const columns = [
   },
   {
     field: "customerUsername",
-    headerName: "Customer Username",
+    headerName: "Customer ID",
     flex: 0.7,
   },
   {
     field: "delivererUsername",
-    headerName: "Deliverer Username",
+    headerName: "Deliverer ID",
     flex: 0.7,
   },
   {
