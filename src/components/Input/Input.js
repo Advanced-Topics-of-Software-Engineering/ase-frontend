@@ -13,6 +13,8 @@ function Input({
   margin = "normal",
   disabled = false,
   required = true,
+  fullWidth = true,
+  style = {},
 }) {
   const [value, setValue] = useState("");
   const [showPassword, setShowPassword] = React.useState(false);
@@ -25,7 +27,7 @@ function Input({
 
   return !isSecured ? (
     <TextField
-      fullWidth
+      fullWidth={fullWidth}
       required={required}
       onChange={handleChange}
       name={name}
@@ -35,6 +37,7 @@ function Input({
       variant="outlined"
       label={label}
       disabled={disabled}
+      style={style}
       InputProps={{
         classes: {
           notchedOutline: "input-border",

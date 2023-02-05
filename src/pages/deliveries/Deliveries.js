@@ -18,8 +18,6 @@ const columns = [
     field: "status",
     headerName: "Status",
     flex: 0.7,
-    type: "singleSelect",
-    valueOptions: ["Ordered", "On Delivery", "Delivered", "Completed"],
   },
   {
     field: "trackingID",
