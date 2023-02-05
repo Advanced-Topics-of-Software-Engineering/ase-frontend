@@ -1,4 +1,4 @@
-FROM node:lts-alpine as builder
+FROM node:16.18-alpine as builder
 
 # by only copying package.json, before running npm install. We can leverage dockers caching strategy for steps. Otherwise docker needs to run npm install every time you change any of the code.
 COPY package.json ./
