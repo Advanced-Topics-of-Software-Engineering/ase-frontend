@@ -23,12 +23,20 @@ const dispatcherTabs = [
     name: "Deliveries",
     endpoint: "deliveries",
   },
+  {
+    name: "Tracking",
+    endpoint: "tracking",
+  },
 ];
 
 const userTabs = [
   {
     name: "Deliveries",
     endpoint: "user-deliveries",
+  },
+  {
+    name: "Tracking",
+    endpoint: "tracking",
   },
 ];
 
@@ -51,7 +59,7 @@ function Header() {
             variant="h6"
             noWrap
             component="a"
-            href="/"
+            href="/profile"
             sx={{
               mr: 2,
               display: { xs: "none", md: "flex" },
@@ -75,7 +83,8 @@ function Header() {
                     {tab.name}
                   </Button>
                 ))
-              : userType === ("ROLE_DELIVERER" || "ROLE_CUSTOMER") &&
+              : (userType === "ROLE_DELIVERER" ||
+                  userType === "ROLE_CUSTOMER") &&
                 userTabs.map((tab, index) => (
                   <Button
                     key={index}

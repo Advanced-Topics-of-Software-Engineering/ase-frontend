@@ -67,8 +67,6 @@ const Customer = () => {
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [message, setMessage] = useState();
   const [error, setError] = useState();
-  const [deletedCustomers, setDeletedCustomers] = useState([]);
-  const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedCustomers([...updatedCustomers, newRow]);
@@ -120,22 +118,6 @@ const Customer = () => {
     }
   };
 
-  const deleteCustomers = () => {
-    for (let i = 0; i < deletedCustomers.length; i++) {
-      axios
-        .post(`${url.base}/dispatcher/delete_user/${deletedCustomers[i]}`)
-        .then((response) => {
-          setMessage(response.data.message);
-          setError(false);
-          setIsOpenAlert(true);
-        })
-        .catch((error) => {
-          setMessage(error.response.data.message);
-          setError(true);
-          setIsOpenAlert(true);
-        });
-    }
-  };
   useEffect(() => {
     setAuth(JSON.parse(sessionStorage.getItem("user")));
   }, []);
@@ -187,63 +169,36 @@ const Customer = () => {
             disableSelectionOnClick
             disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
-            checkboxSelection
             processRowUpdate={handleProcessRowUpdate}
-            onSelectionModelChange={(itm) => setDeletedCustomers(itm)}
             style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
             sx={{
               boxShadow: "5",
             }}
           />
-          <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent={"space-between"}
+
+          <Button
+            disabled={updatedCustomers.length < 1}
+            sx={{ borderRadius: 1 }}
+            variant="contained"
+            color="primary"
+            style={{
+              height: "40px",
+              width: "200px",
+              marginTop: "10px",
+            }}
+            onClick={() => {
+              setIsOpenDialog(true);
+            }}
           >
-            <Button
-              disabled={deletedCustomers.length < 1}
-              sx={{ borderRadius: 1 }}
-              variant="contained"
-              color="primary"
-              style={{
-                height: "40px",
-                width: "250px",
-                marginTop: "10px",
-              }}
-              onClick={() => {
-                setIsOpenDialog(true);
-                setIsAlertforDelete(true);
-              }}
-            >
-              {" "}
-              Delete Selected {deletedCustomers.length > 1
-                ? "Items"
-                : "Item"}{" "}
-            </Button>
-            <Button
-              disabled={updatedCustomers.length < 1}
-              sx={{ borderRadius: 1 }}
-              variant="contained"
-              color="primary"
-              style={{
-                height: "40px",
-                width: "200px",
-                marginTop: "10px",
-              }}
-              onClick={() => {
-                setIsOpenDialog(true);
-                setIsAlertforDelete(false);
-              }}
-            >
-              Submit Changes
-            </Button>
-          </Box>
+            Submit Changes
+          </Button>
+
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              isAlertforDelete ? deleteCustomers() : updateCustomers();
+              updateCustomers();
             }}
           />
           {isOpenAlert && (
