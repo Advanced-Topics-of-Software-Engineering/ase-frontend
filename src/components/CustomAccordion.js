@@ -1,29 +1,23 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Typography,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Button,
 } from "@mui/material";
-import Input from "./Input/Input";
 
 export default function CustomAccordion({
-  datas,
-  newObject,
+  firstField,
+  secondField,
+  thirdField,
+  title,
+  available,
   handleCreate,
-  header,
-  isTextBoxes,
 }) {
-  const handleChange = (index) => (e) => {
-    newObject[index] = e.target.value;
-  };
-  useEffect(() => {}, [newObject, datas]);
+  useEffect(() => {}, [available]);
+
   return (
     <div>
       <form>
@@ -42,82 +36,28 @@ export default function CustomAccordion({
             }}
             expandIcon={<ExpandMoreIcon />}
           >
-            <Typography variant="h3">{header}</Typography>
+            <Typography variant="h3">{title}</Typography>
           </AccordionSummary>
-          <AccordionDetails>
-            {isTextBoxes &&
-              Object.entries(datas).map(([key, value], index) => {
-                return (
-                  <FormControl
-                    fullWidth
-                    required
-                    margin="normal"
-                    variant="outlined"
-                  >
-                    <InputLabel style={{ color: "#660090" }}>
-                      {value.title}
-                    </InputLabel>
-                    <Select
-                      variant="outlined"
-                      value={newObject[index]}
-                      onChange={handleChange(index)}
-                      label="user type"
-                      sx={{
-                        ".MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#660090",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#660090",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#660090",
-                        },
-                        "& .MuiOutlinedInput-input": {
-                          color: "#660090",
-                        },
-                        ".MuiSvgIcon-root ": {
-                          fill: "#660090",
-                        },
-                      }}
-                    >
-                      {value.data.map((item, index) => {
-                        return (
-                          <MenuItem key={index} value={item.id}>
-                            {typeof item.username !== "undefined"
-                              ? item.username
-                              : item.name}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                  </FormControl>
-                );
-              })}
-            {!isTextBoxes &&
-              Object.entries(datas).map(([key, value], index) => {
-                return (
-                  <Input
-                    name={value.title}
-                    onChange={handleChange(index)}
-                    label={value.title}
-                  />
-                );
-              })}
-
-            <Button
-              sx={{ borderRadius: 1 }}
-              variant="contained"
-              color="primary"
-              style={{
-                height: "40px",
-                width: "140px",
-                marginTop: "10px",
-              }}
-              onClick={handleCreate}
-            >
-              Add
-            </Button>
-          </AccordionDetails>
+          <AccordionDetails>{firstField}</AccordionDetails>
+          <AccordionDetails>{secondField}</AccordionDetails>
+          {available ? (
+            <AccordionDetails>{thirdField}</AccordionDetails>
+          ) : (
+            <div></div>
+          )}
+          <Button
+            sx={{ borderRadius: 1 }}
+            variant="contained"
+            color="primary"
+            style={{
+              height: "40px",
+              width: "140px",
+              margin: "16px",
+            }}
+            onClick={handleCreate}
+          >
+            Add
+          </Button>
         </Accordion>
       </form>
     </div>

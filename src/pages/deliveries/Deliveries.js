@@ -4,9 +4,11 @@ import theme from "../../theme/Theme";
 import Header from "../../components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Snackbar, Alert } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "../../App.css";
 import axios from "axios";
 import CustomAccordion from "../../components/CustomAccordion";
+import CustomSelect from "../../components/CustomSelect";
 import ResponsiveDialog from "../../components/ResponsiveDialog";
 import url from "../../API";
 
@@ -15,8 +17,7 @@ const columns = [
   {
     field: "status",
     headerName: "Status",
-    flex: 0.5,
-    editable: true,
+    flex: 0.7,
     type: "singleSelect",
     valueOptions: ["Ordered", "On Delivery", "Delivered", "Completed"],
   },
@@ -24,31 +25,26 @@ const columns = [
     field: "trackingID",
     headerName: "Tracking ID",
     flex: 1,
-    editable: true,
   },
   {
     field: "boxName",
     headerName: "Box Name",
     flex: 0.5,
-    editable: true,
   },
   {
     field: "boxAddress",
     headerName: "Box Address",
     flex: 1,
-    editable: true,
   },
   {
     field: "customerUsername",
     headerName: "Customer Username",
-    flex: 1,
-    editable: true,
+    flex: 0.7,
   },
   {
     field: "delivererUsername",
     headerName: "Deliverer Username",
-    flex: 1,
-    editable: true,
+    flex: 0.7,
   },
   {
     field: "boxID",
@@ -57,25 +53,7 @@ const columns = [
 ];
 
 const Deliveries = () => {
-  const [deliveries, setDeliveries] = useState([
-    {
-      id: "",
-      status: "",
-      trackingID: "",
-      box: {
-        id: "",
-        name: "",
-      },
-      customer: {
-        id: "",
-        username: "",
-      },
-      deliverer: {
-        id: "",
-        username: "",
-      },
-    },
-  ]);
+  const [deliveries, setDeliveries] = useState([]);
 
   const [auth, setAuth] = useState([
     {
@@ -93,12 +71,18 @@ const Deliveries = () => {
   const [boxes, setBoxes] = useState([{}]);
   const [customers, setCustomers] = useState([{}]);
   const [deliverers, setDeliverers] = useState([{}]);
-  const [newDelivery, setNewDelivery] = useState([]);
+  const [newDelivery, setNewDelivery] = useState({
+    customer: "",
+    box: "",
+    deliverer: "",
+  });
+
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [updatedDeliveries, setUpdatedDeliveries] = useState([]);
   const [deletedDeliveries, setDeletedDeliveries] = useState([]);
   const [isAlertforDelete, setIsAlertforDelete] = useState(false);
+  const [isBoxesAvailable, setIsBoxesAvailable] = useState(false);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedDeliveries([...updatedDeliveries, newRow]);
@@ -109,6 +93,7 @@ const Deliveries = () => {
       .get(`${url.base}/delivery`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
+          Authorization: `Bearer ${auth.accessToken}`,
         },
       })
       .then((response) => {
@@ -122,31 +107,40 @@ const Deliveries = () => {
   const updateDeliveries = async () => {
     for (let i = 0; i < updatedDeliveries.length; i++) {
       axios
-        .post(`${url.base}/delivery/update/${updatedDeliveries[i].id}`, {
-          id: updatedDeliveries[i].id,
-          status: updatedDeliveries[i].status,
-          trackingID: updatedDeliveries[i].trackingID,
-          box: {
-            id: updatedDeliveries[i].boxID,
-            streetAddress: updatedDeliveries[i].boxAddress,
-            name: updatedDeliveries[i].boxName,
+        .post(
+          `${url.base}/delivery/update/${updatedDeliveries[i].id}`,
+          {
+            id: updatedDeliveries[i].id,
+            status: updatedDeliveries[i].status,
+            trackingID: updatedDeliveries[i].trackingID,
+            box: {
+              id: updatedDeliveries[i].boxID,
+              streetAddress: updatedDeliveries[i].boxAddress,
+              name: updatedDeliveries[i].boxName,
+            },
+            customer: {
+              id: updatedDeliveries[i].customerId,
+            },
+            deliverer: {
+              id: updatedDeliveries[i].delivererId,
+            },
           },
-          customer: {
-            id: updatedDeliveries[i].customerId,
-          },
-          deliverer: {
-            id: updatedDeliveries[i].delivererId,
-          },
-        })
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "ase",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        )
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         });
     }
   };
@@ -154,48 +148,68 @@ const Deliveries = () => {
   const deleteDeliveries = async () => {
     for (let i = 0; i < deletedDeliveries.length; i++) {
       axios
-        .post(`${url.base}/box/delete/${deletedDeliveries[i]}`)
+        .post(
+          `${url.base}/delivery/delete/${deletedDeliveries[i]}`,
+          {},
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "ase",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        )
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         });
     }
   };
 
   const createNewDelivery = async () => {
     axios
-      .post(`${url.base}/delivery`, {
-        box: {
-          id: newDelivery[0],
+      .post(
+        `${url.base}/delivery`,
+        {
+          customerID: newDelivery.customer,
+          boxID: newDelivery.box,
+          delivererID: newDelivery.deliverer,
         },
-        customerID: newDelivery[1],
-        delivererID: newDelivery[2],
-      })
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "ase",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      )
       .then((response) => {
-        setError("");
+        setMessage(response.data.message);
+        setError(false);
         setIsOpenAlert(true);
       })
       .catch((error) => {
-        setError(error.toJSON().message);
+        setMessage(error.response.data.message);
+        setError(true);
         setIsOpenAlert(true);
       });
   };
 
   const getBoxes = async () => {
     axios
-      .get(`${url.base}/box`, {
+      .get(`${url.base}/box/available/${newDelivery.customer}`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
+          Authorization: `Bearer ${auth.accessToken}`,
         },
       })
       .then((response) => {
         setBoxes(response.data);
+        setIsBoxesAvailable(true);
       })
       .catch((error) => {
         console.error(error);
@@ -204,7 +218,7 @@ const Deliveries = () => {
 
   const getCustomers = async () => {
     axios
-      .get(`${url.auth}/dispatcher/get_all_customers`, {
+      .get(`${url.base}/dispatcher/get_all_customers`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
@@ -220,7 +234,7 @@ const Deliveries = () => {
 
   const getDeliverers = async () => {
     axios
-      .get(`${url.auth}/dispatcher/get_all_deliverers`, {
+      .get(`${url.base}/dispatcher/get_all_deliverers`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
@@ -234,6 +248,17 @@ const Deliveries = () => {
       });
   };
 
+  const handleNewDelivery = (e) => {
+    setNewDelivery((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  useEffect(() => {
+    getBoxes();
+  }, [newDelivery.customer]);
+
   useEffect(() => {
     setAuth(JSON.parse(sessionStorage.getItem("user")));
   }, []);
@@ -242,11 +267,10 @@ const Deliveries = () => {
     setTimeout(() => {
       if (auth !== null && auth.userType === "ROLE_DISPATCHER") {
         getDeliveries();
-        getBoxes();
         getCustomers();
         getDeliverers();
       }
-    }, 500);
+    }, 100);
   }, [auth]);
 
   return (
@@ -263,25 +287,32 @@ const Deliveries = () => {
           sx={{ height: "80vh", width: "90%" }}
         >
           <CustomAccordion
-            datas={[
-              {
-                title: "Box",
-                data: boxes,
-              },
-              {
-                title: "Customer",
-                data: customers,
-              },
-              {
-                title: "Deliverer",
-                data: deliverers,
-              },
-            ]}
-            newObject={newDelivery}
+            title={"Add New Delivery"}
+            firstField={
+              <CustomSelect
+                title={"deliverer"}
+                options={deliverers}
+                onChangeHandler={handleNewDelivery}
+              />
+            }
+            secondField={
+              <CustomSelect
+                title={"customer"}
+                options={customers}
+                onChangeHandler={handleNewDelivery}
+              />
+            }
+            available={isBoxesAvailable}
+            thirdField={
+              <CustomSelect
+                title={"box"}
+                options={boxes}
+                onChangeHandler={handleNewDelivery}
+              />
+            }
             handleCreate={createNewDelivery}
-            header={"Add new delivery"}
-            isTextBoxes={true}
           />
+
           <DataGrid
             rows={deliveries.map((delivery, idx) => ({
               id: delivery.id,
@@ -289,10 +320,8 @@ const Deliveries = () => {
               trackingID: delivery.trackingID,
               boxName: delivery.box.name,
               boxAddress: delivery.box.streetAddress,
-              customerUsername:
-                "Object.entries(delivery.customer).map([key, value]) => value.username)",
-              delivererUsername:
-                "Object.entries(delivery.deliverer).map(([key, value]) => value.username)",
+              customerUsername: "",
+              delivererUsername: ")",
               boxID: delivery.box.id,
             }))}
             columns={columns}
@@ -318,7 +347,7 @@ const Deliveries = () => {
             justifyContent={"space-between"}
           >
             <Button
-              type="delete"
+              disabled={deletedDeliveries.length < 1}
               sx={{ borderRadius: 1 }}
               variant="contained"
               color="primary"
@@ -329,6 +358,7 @@ const Deliveries = () => {
               }}
               onClick={() => {
                 setIsOpenDialog(true);
+                setIsAlertforDelete(true);
               }}
             >
               {" "}
@@ -337,7 +367,7 @@ const Deliveries = () => {
                 : "Item"}{" "}
             </Button>
             <Button
-              type="submit"
+              disabled={updatedDeliveries.length < 1}
               sx={{ borderRadius: 1 }}
               variant="contained"
               color="primary"
@@ -348,17 +378,19 @@ const Deliveries = () => {
               }}
               onClick={() => {
                 setIsOpenDialog(true);
+                setIsAlertforDelete(false);
               }}
             >
               Submit Changes
             </Button>
           </Box>
+
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              isAlertforDelete ? updateDeliveries() : deleteDeliveries();
+              isAlertforDelete ? deleteDeliveries() : updateDeliveries();
             }}
           />
           {isOpenAlert && (
@@ -367,21 +399,19 @@ const Deliveries = () => {
               autoHideDuration={1000}
               onClose={() => {
                 setIsOpenAlert(null);
-                window.location.reload(true);
+                if (!error) {
+                  window.location.reload(true);
+                }
               }}
             >
               <Alert
                 onClose={() => {
                   setIsOpenAlert(null);
                 }}
-                severity={error === "" ? "success" : "error"}
+                severity={error ? "error" : "success"}
                 sx={{ width: "100%" }}
               >
-                {error === ""
-                  ? ` ${
-                      deletedDeliveries.length > 1 ? "Deliveries" : "Delivery "
-                    } ${isAlertforDelete ? "deleted" : "updated"} successfully`
-                  : error}
+                {message}
               </Alert>
             </Snackbar>
           )}
