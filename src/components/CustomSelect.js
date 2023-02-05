@@ -1,13 +1,5 @@
-import React, { useEffect, useState } from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import {
-  Typography,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from "@mui/material";
+import React, { useState } from "react";
+import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 
 export default function CustomSelect({ options, title, onChangeHandler }) {
   const [value, setValue] = useState("");
