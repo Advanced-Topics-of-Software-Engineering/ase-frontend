@@ -35,13 +35,13 @@ const columns = [
     flex: 1,
   },
   {
-    field: "customerUsername",
-    headerName: "Customer Username",
+    field: "customerId",
+    headerName: "Customer ID",
     flex: 0.7,
   },
   {
-    field: "delivererUsername",
-    headerName: "Deliverer Username",
+    field: "delivererId",
+    headerName: "Deliverer ID",
     flex: 0.7,
   },
   {
@@ -318,8 +318,8 @@ const Deliveries = () => {
               trackingID: delivery.trackingID,
               boxName: delivery.box.name,
               boxAddress: delivery.box.streetAddress,
-              customerUsername: "",
-              delivererUsername: ")",
+              customerId: delivery.customerID,
+              delivererId: delivery.delivererID,
               boxID: delivery.box.id,
             }))}
             columns={columns}
