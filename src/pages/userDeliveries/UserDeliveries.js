@@ -8,15 +8,8 @@ import "../../App.css";
 import axios from "axios";
 import url from "../../API";
 import ResponsiveDialog from "../../components/ResponsiveDialog";
-
-const columns = [
-  { field: "id", headerName: "ID", flex: 1 },
-  { field: "trackingCode", headerName: "Tracking Code", flex: 1 },
-  { field: "customer", headerName: "Assigned Customer", flex: 1 },
-  { field: "boxName", headerName: "Assigned Box Name", flex: 1 },
-  { field: "boxAddress", headerName: "Assigned Box Address", flex: 1 },
-  { field: "status", headerName: "Status", flex: 1, editable: true },
-];
+import QRCodeGenerator from "../QRCode/QRCodeGenerator";
+import CustomPopover from "../../components/CustomPopover";
 
 const UserDeliveries = () => {
   const [auth, setAuth] = useState([
@@ -31,18 +24,61 @@ const UserDeliveries = () => {
   ]);
 
   const [deliveries, setDeliveries] = useState([]);
-  const [updatedDeliveries, setUpdatedDeliveries] = useState([]);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [error, setError] = useState();
 
-  const handleProcessRowUpdate = (newRow, oldRow) => {
-    setUpdatedDeliveries([...updatedDeliveries, newRow]);
-  };
+  const columns = [
+    { field: "id", headerName: "ID", flex: 1 },
+    { field: "trackingCode", headerName: "Tracking Code", flex: 1 },
+    { field: "customer", headerName: "Assigned Customer", flex: 1 },
+    { field: "boxName", headerName: "Assigned Box Name", flex: 1 },
+    { field: "boxAddress", headerName: "Assigned Box Address", flex: 1 },
+    { field: "status", headerName: "Status", flex: 1, editable: true },
+    {
+      field: "qrCode",
+      headerName: "QR Code",
+      width: 150,
+      renderCell: (params) => {
+        const onClick = (e) => {
+          updateDeliveryStatus(params.value);
+        };
+        return (
+          <Button onClick={onClick}>
+            <CustomPopover code={<QRCodeGenerator id={params.value} />} />
+          </Button>
+        );
+      },
+    },
+  ];
+
+  function updateDeliveryStatus(trackingID) {
+    axios
+      .post(
+        `${url.base}/delivery/deliverer/updateStatus/${trackingID}`,
+        {},
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "ase",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      )
+      .then((response) => {
+        // setMessage(response.data.message);
+        setError(false);
+        setIsOpenAlert(true);
+      })
+      .catch((error) => {
+        // setMessage(error.response.data.message);
+        setError(true);
+        setIsOpenAlert(true);
+      });
+  }
 
   const getDeliveriesForDeliverer = async () => {
     axios
-      .get(`${url.base}/deliverer/${auth.id}`, {
+      .get(`${url.base}/delivery/deliverer/${auth.id}`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
@@ -58,7 +94,7 @@ const UserDeliveries = () => {
 
   const getDeliveriesForCustomer = async () => {
     axios
-      .get(`${url.base}/customer/${auth.id}`, {
+      .get(`${url.base}/delivery/customer/${auth.id}`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
@@ -70,23 +106,6 @@ const UserDeliveries = () => {
       .catch((error) => {
         console.error(error);
       });
-  };
-
-  const updateDeliveries = async () => {
-    for (let i = 0; i < updatedDeliveries.length; i++) {
-      axios
-        .post(`${url.base}/delivery/update/${updatedDeliveries[i].id}`, {
-          status: updatedDeliveries[i].status,
-        })
-        .then((response) => {
-          setError("");
-          setIsOpenAlert(true);
-        })
-        .catch((error) => {
-          setError(error.toJSON().message);
-          setIsOpenAlert(true);
-        });
-    }
   };
 
   useEffect(() => {
@@ -133,7 +152,6 @@ const UserDeliveries = () => {
             disableSelectionOnClick
             disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
-            processRowUpdate={handleProcessRowUpdate}
             style={{
               marginTop: 10,
               backgroundColor: "#fcfbfa",
@@ -142,50 +160,6 @@ const UserDeliveries = () => {
               boxShadow: "5",
             }}
           />
-          <Button
-            type="submit"
-            sx={{ borderRadius: 1 }}
-            variant="contained"
-            color="primary"
-            style={{
-              height: "40px",
-              width: "200px",
-              marginTop: "10px",
-            }}
-            onClick={() => {
-              setIsOpenDialog(true);
-            }}
-          >
-            Submit Changes
-          </Button>
-          <ResponsiveDialog
-            isOpen={isOpenDialog}
-            handleClose={() => setIsOpenDialog(false)}
-            title="Are you sure?"
-            handleYesClick={updateDeliveries}
-          />
-          {isOpenAlert && (
-            <Snackbar
-              open={isOpenAlert}
-              autoHideDuration={1000}
-              onClose={() => {
-                setIsOpenAlert(null);
-                if (!error) {
-                  window.location.reload(true);
-                }
-              }}
-            >
-              <Alert
-                onClose={() => {
-                  setIsOpenAlert(null);
-                }}
-                severity={error === "" ? "success" : "error"}
-                sx={{ width: "100%" }}
-              >
-                {error === "" ? "Values successfully changed" : error}
-              </Alert>
-            </Snackbar>
-          )}
         </Box>
       </div>
     </ThemeProvider>

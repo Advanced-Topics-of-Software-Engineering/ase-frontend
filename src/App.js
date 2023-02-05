@@ -7,7 +7,6 @@ import Deliverer from "./pages/deliverer/Deliverer";
 import Deliveries from "./pages/deliveries/Deliveries";
 import PickupBoxes from "./pages/pickup-boxes/PickupBoxes";
 import Register from "./pages/register/Register";
-import QRCodeGenerator from "./QRCodeGenerator";
 import Dispatcher from "./pages/dispatcher/Dispatcher";
 import Profile from "./pages/profile/Profile";
 import UserDeliveries from "./pages/userDeliveries/UserDeliveries";

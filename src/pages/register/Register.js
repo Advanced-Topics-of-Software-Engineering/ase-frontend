@@ -178,6 +178,9 @@ const Register = () => {
                 autoHideDuration={1000}
                 onClose={() => {
                   setIsOpenAlert(null);
+                  if (!error) {
+                    window.location.reload(true);
+                  }
                 }}
               >
                 <Alert

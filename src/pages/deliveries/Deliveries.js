@@ -4,7 +4,6 @@ import theme from "../../theme/Theme";
 import Header from "../../components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Snackbar, Alert } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "../../App.css";
 import axios from "axios";
 import CustomAccordion from "../../components/CustomAccordion";
@@ -52,7 +51,6 @@ const columns = [
 
 const Deliveries = () => {
   const [deliveries, setDeliveries] = useState([]);
-
   const [auth, setAuth] = useState([
     {
       accessToken: "",
@@ -74,7 +72,6 @@ const Deliveries = () => {
     box: "",
     deliverer: "",
   });
-
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [updatedDeliveries, setUpdatedDeliveries] = useState([]);
@@ -85,6 +82,44 @@ const Deliveries = () => {
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedDeliveries([...updatedDeliveries, newRow]);
   };
+
+  const columns = [
+    { field: "id", headerName: "ID", flex: 1 },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 0.7,
+    },
+    {
+      field: "trackingID",
+      headerName: "Tracking ID",
+      flex: 1,
+    },
+    {
+      field: "boxName",
+      headerName: "Box Name",
+      flex: 0.5,
+    },
+    {
+      field: "boxAddress",
+      headerName: "Box Address",
+      flex: 1,
+    },
+    {
+      field: "customerUsername",
+      headerName: "Customer Username",
+      flex: 0.7,
+    },
+    {
+      field: "delivererUsername",
+      headerName: "Deliverer Username",
+      flex: 0.7,
+    },
+    {
+      field: "boxID",
+      hide: true,
+    },
+  ];
 
   const getDeliveries = async () => {
     axios
@@ -253,6 +288,19 @@ const Deliveries = () => {
     }));
   };
 
+  // const downloadQR = () => {
+  //   const canvas = document.getElementById("hkadjshdsk");
+  //   const pngUrl = canvas
+  //     .toDataURL("image/png")
+  //     .replace("image/png", "image/octet-stream");
+  //   let downloadLink = document.createElement("a");
+  //   downloadLink.href = pngUrl;
+  //   downloadLink.download = "123456.png";
+  //   document.body.appendChild(downloadLink);
+  //   downloadLink.click();
+  //   document.body.removeChild(downloadLink);
+  // };
+
   useEffect(() => {
     getBoxes();
   }, [newDelivery.customer]);
@@ -310,7 +358,6 @@ const Deliveries = () => {
             }
             handleCreate={createNewDelivery}
           />
-
           <DataGrid
             rows={deliveries.map((delivery, idx) => ({
               id: delivery.id,
@@ -321,6 +368,7 @@ const Deliveries = () => {
               customerId: delivery.customerID,
               delivererId: delivery.delivererID,
               boxID: delivery.box.id,
+              qrCode: delivery.trackingID,
             }))}
             columns={columns}
             editMode="row"
@@ -383,6 +431,18 @@ const Deliveries = () => {
             </Button>
           </Box>
 
+          {/* <QRCodeScan
+          // handler={updateDeliveryStatus(
+          //   "e6e0872ec773ddc00889b8bd3b3cfa3b6afef831c0102fb9442e186e4078b2d0"
+          // )}
+          />
+          <QRCodeGenerator
+            id={
+              "https://chat.openai.com/chat/c3e74b98-b90a-4a3c-9ed2-daeebdfad375"
+            }
+          /> */}
+
+          {/* <a onClick={downloadQR}> Download QR </a> */}
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
