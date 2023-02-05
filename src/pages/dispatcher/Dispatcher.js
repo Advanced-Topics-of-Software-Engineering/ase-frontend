@@ -14,20 +14,13 @@ const columns = [
   {
     field: "username",
     headerName: "Username",
-    flex: 0.5,
+    flex: 1,
     editable: true,
     sortable: false,
   },
   {
     field: "email",
     headerName: "Email",
-    flex: 0.7,
-    editable: true,
-    sortable: false,
-  },
-  {
-    field: "rfidtoken",
-    headerName: "RFID Token",
     flex: 1,
     editable: true,
     sortable: false,
@@ -35,8 +28,7 @@ const columns = [
   {
     field: "role",
     headerName: "User Type",
-    flex: 0.3,
-    editable: true,
+    flex: 1,
     sortable: false,
   },
 ];
@@ -52,16 +44,7 @@ function setRole(role) {
 }
 
 const Dispatcher = () => {
-  const [dispatchers, setDispatchers] = useState([
-    {
-      id: "",
-      email: "",
-      rfidtoken: "",
-      username: "",
-      role: "",
-      password: "",
-    },
-  ]);
+  const [dispatchers, setDispatchers] = useState([]);
 
   const [auth, setAuth] = useState([
     {
@@ -82,9 +65,13 @@ const Dispatcher = () => {
   const [deletedDispatchers, setDeletedDispatchers] = useState([]);
   const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
+  const handleProcessRowUpdate = (newRow, oldRow) => {
+    setUpdatedDispatchers([...updatedDispatchers, newRow]);
+  };
+
   const getDispatchers = () => {
     axios
-      .get(`${url.auth}/dispatcher/get_all_dispatchers`, {
+      .get(`${url.base}/dispatcher/get_all_dispatchers`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
@@ -101,22 +88,29 @@ const Dispatcher = () => {
   const updateDispatchers = async () => {
     for (let i = 0; i < updatedDispatchers.length; i++) {
       axios
-        .post(`${url.base}/dispatcher/edit_user/${updatedDispatchers[i].id}`, {
-          username: updatedDispatchers[i].username,
-          email: updatedDispatchers[i].email,
-          password: updatedDispatchers[i].password,
-        })
+        .post(
+          `${url.base}/dispatcher/edit_user/${updatedDispatchers[i].id}`,
+          {
+            username: updatedDispatchers[i].username,
+            email: updatedDispatchers[i].email,
+            password: updatedDispatchers[i].password,
+          },
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "ase",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        )
         .then((response) => {
           setMessage(response.data.message);
           setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         })
         .catch((error) => {
           setMessage(error.response.data.message);
           setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         });
     }
   };
@@ -129,13 +123,11 @@ const Dispatcher = () => {
           setMessage(response.data.message);
           setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         })
         .catch((error) => {
           setMessage(error.response.data.message);
           setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         });
     }
   };
@@ -149,7 +141,7 @@ const Dispatcher = () => {
       if (auth !== null && auth.userType === "ROLE_DISPATCHER") {
         getDispatchers();
       }
-    }, 500);
+    }, 100);
   }, [auth]);
 
   return (
@@ -183,7 +175,6 @@ const Dispatcher = () => {
               id: dispatcher.id,
               username: dispatcher.username,
               email: dispatcher.email,
-              rfidtoken: dispatcher.rfidtoken,
               role: setRole(dispatcher.role),
             }))}
             columns={columns}
@@ -193,6 +184,7 @@ const Dispatcher = () => {
             disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
             checkboxSelection
+            processRowUpdate={handleProcessRowUpdate}
             onSelectionModelChange={(itm) => setDeletedDispatchers(itm)}
             style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
             sx={{
@@ -200,12 +192,55 @@ const Dispatcher = () => {
             }}
           />
 
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent={"space-between"}
+          >
+            <Button
+              disabled={deletedDispatchers.length < 1}
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "250px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+                setIsAlertforDelete(true);
+              }}
+            >
+              {" "}
+              Delete Selected {deletedDispatchers.length > 1
+                ? "Items"
+                : "Item"}{" "}
+            </Button>
+            <Button
+              disabled={updatedDispatchers.length < 1}
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "200px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+                setIsAlertforDelete(false);
+              }}
+            >
+              Submit Changes
+            </Button>
+          </Box>
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              isAlertforDelete ? updateDispatchers() : deleteDispatchers();
+              isAlertforDelete ? deleteDispatchers() : updateDispatchers();
             }}
           />
           {isOpenAlert && (
@@ -214,7 +249,9 @@ const Dispatcher = () => {
               autoHideDuration={1000}
               onClose={() => {
                 setIsOpenAlert(null);
-                window.location.reload(true);
+                if (!error) {
+                  window.location.reload(true);
+                }
               }}
             >
               <Alert

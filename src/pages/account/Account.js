@@ -149,7 +149,6 @@ export default function Account() {
               trackingCode: account.trackingID,
               boxName: account.box.name,
               boxAddress: account.box.streetAddress,
-              customer: account.customer.rfidtoken,
               status: account.status,
             }))}
             columns={columns}

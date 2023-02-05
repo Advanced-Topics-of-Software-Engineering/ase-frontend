@@ -26,17 +26,28 @@ const Login = () => {
     e.preventDefault();
 
     axios
-      .post(`${url.base}/api/auth/signin`, {
-        username: inputs.username,
-        password: inputs.password,
-      })
+      .post(
+        `${url.base}/api/auth/signin`,
+        {
+          username: inputs.username,
+          password: inputs.password,
+        },
+
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "ase",
+          },
+        }
+      )
       .then((response) => {
+        console.log(response);
         if (response.data.accessToken) {
           sessionStorage.setItem("user", JSON.stringify(response.data));
           setRedirect(true);
         }
       })
       .catch((error) => {
+        console.log(error);
         setMessage(error.response.data.message);
         setIsOpenAlert(true);
         setError(true);

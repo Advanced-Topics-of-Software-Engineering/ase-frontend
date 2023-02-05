@@ -10,6 +10,7 @@ function Input({
   label,
   onChange,
   isSecured = false,
+  margin = "normal",
   disabled = false,
   required = true,
 }) {
@@ -29,7 +30,7 @@ function Input({
       onChange={handleChange}
       name={name}
       value={value}
-      margin="normal"
+      margin={margin}
       type={type}
       variant="outlined"
       label={label}

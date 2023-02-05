@@ -54,7 +54,7 @@ const Register = () => {
     e.preventDefault();
     axios
       .post(
-        `${url.auth}/api/auth/signup`,
+        `${url.base}/api/auth/signup`,
         {
           username: inputs.username,
           email: inputs.email,

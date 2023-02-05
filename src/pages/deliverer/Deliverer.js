@@ -14,20 +14,13 @@ const columns = [
   {
     field: "username",
     headerName: "Username",
-    flex: 0.5,
+    flex: 1,
     editable: true,
     sortable: false,
   },
   {
     field: "email",
     headerName: "Email",
-    flex: 0.7,
-    editable: true,
-    sortable: false,
-  },
-  {
-    field: "rfidtoken",
-    headerName: "RFID Token",
     flex: 1,
     editable: true,
     sortable: false,
@@ -35,8 +28,7 @@ const columns = [
   {
     field: "role",
     headerName: "User Type",
-    flex: 0.3,
-    editable: true,
+    flex: 1,
     sortable: false,
   },
   {
@@ -59,16 +51,7 @@ function setRole(role) {
 }
 
 const Deliverer = () => {
-  const [deliverers, setDeliverers] = useState([
-    {
-      id: "",
-      email: "",
-      rfidtoken: "",
-      username: "",
-      role: "",
-      password: "",
-    },
-  ]);
+  const [deliverers, setDeliverers] = useState([]);
   const [auth, setAuth] = useState([
     {
       accessToken: "",
@@ -109,11 +92,10 @@ const Deliverer = () => {
   };
 
   const updateDeliverers = () => {
-    console.log(updatedDeliverers);
     for (let i = 0; i < updatedDeliverers.length; i++) {
       axios
         .post(
-          `${url.auth}/dispatcher/edit_user/${updatedDeliverers[i].id}`,
+          `${url.base}/dispatcher/edit_user/${updatedDeliverers[i].id}`,
           {
             username: updatedDeliverers[i].username,
             email: updatedDeliverers[i].email,
@@ -130,13 +112,11 @@ const Deliverer = () => {
           setMessage(response.data.message);
           setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         })
         .catch((error) => {
           setMessage(error.response.data.message);
           setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         });
     }
   };
@@ -144,18 +124,16 @@ const Deliverer = () => {
   const deleteDeliverers = () => {
     for (let i = 0; i < deletedDeliverers.length; i++) {
       axios
-        .post(`${url.base}/delivery/delete/${deletedDeliverers[i]}`)
+        .post(`${url.base}/dispatcher/delete_user/${deletedDeliverers[i]}`)
         .then((response) => {
           setMessage(response.data.message);
           setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         })
         .catch((error) => {
           setMessage(error.response.data.message);
           setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         });
     }
   };
@@ -169,7 +147,7 @@ const Deliverer = () => {
       if (auth !== null && auth.userType === "ROLE_DISPATCHER") {
         getDeliverers();
       }
-    }, 500);
+    }, 100);
   }, [auth]);
 
   return (
@@ -203,7 +181,6 @@ const Deliverer = () => {
               id: deliverer.id,
               username: deliverer.username,
               email: deliverer.email,
-              rfidtoken: deliverer.rfidtoken,
               role: setRole(deliverer.role),
               password: deliverer.password,
             }))}
@@ -221,28 +198,55 @@ const Deliverer = () => {
               boxShadow: "5",
             }}
           />
-          <Button
-            type="submit"
-            sx={{ borderRadius: 1 }}
-            variant="contained"
-            color="primary"
-            style={{
-              height: "40px",
-              width: "200px",
-              marginTop: "10px",
-            }}
-            onClick={() => {
-              setIsOpenDialog(true);
-            }}
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent={"space-between"}
           >
-            Submit Changes
-          </Button>
+            <Button
+              disabled={deletedDeliverers.length < 1}
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "250px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+                setIsAlertforDelete(true);
+              }}
+            >
+              {" "}
+              Delete Selected {deletedDeliverers.length > 1
+                ? "Items"
+                : "Item"}{" "}
+            </Button>
+            <Button
+              disabled={updatedDeliverers.length < 1}
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "200px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+                setIsAlertforDelete(false);
+              }}
+            >
+              Submit Changes
+            </Button>
+          </Box>
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              isAlertforDelete ? updateDeliverers() : deleteDeliverers();
+              isAlertforDelete ? deleteDeliverers() : updateDeliverers();
             }}
           />
           {isOpenAlert && (
@@ -251,22 +255,19 @@ const Deliverer = () => {
               autoHideDuration={1000}
               onClose={() => {
                 setIsOpenAlert(null);
-                window.location.reload(true);
+                if (!error) {
+                  window.location.reload(true);
+                }
               }}
             >
               <Alert
                 onClose={() => {
                   setIsOpenAlert(null);
                 }}
-                severity={error === "" ? "success" : "error"}
+                severity={error ? "error" : "success"}
                 sx={{ width: "100%" }}
               >
-                {error === ""
-                  ? `${
-                      deletedDeliverers.length > 1 ? "Deliverers" : "Deliverer"
-                    } 
-                    ${isAlertforDelete ? "deleted" : "updated"} successfully`
-                  : error}
+                {message}
               </Alert>
             </Snackbar>
           )}

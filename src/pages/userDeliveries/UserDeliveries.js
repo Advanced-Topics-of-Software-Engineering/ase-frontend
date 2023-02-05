@@ -82,7 +82,7 @@ const UserDeliveries = () => {
   useEffect(() => {
     setTimeout(() => {
       getDeliveries();
-    }, 500);
+    }, 100);
   }, []);
 
   return (
@@ -152,7 +152,9 @@ const UserDeliveries = () => {
               autoHideDuration={1000}
               onClose={() => {
                 setIsOpenAlert(null);
-                window.location.reload(true);
+                if (!error) {
+                  window.location.reload(true);
+                }
               }}
             >
               <Alert
