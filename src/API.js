@@ -1,5 +1,5 @@
 const url = {
-  base: "https://ase-deployment-ti4g3idaca-uc.a.run.app",
+  base: "https://ase-backend-ti4g3idaca-uc.a.run.app",
   auth: "https://ase-auth-ti4g3idaca-uc.a.run.app",
 };
 
