@@ -11,6 +11,7 @@ import QRCodeGenerator from "./QRCodeGenerator";
 import Dispatcher from "./pages/dispatcher/Dispatcher";
 import Profile from "./pages/profile/Profile";
 import UserDeliveries from "./pages/userDeliveries/UserDeliveries";
+import Tracking from "./pages/tracking/Tracking";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route exact path="/deliveries" element={<Deliveries />} />
         <Route exact path="/pickup-boxes" element={<PickupBoxes />} />
         <Route exact path="/profile" element={<Profile />} />
+        <Route exact path="/tracking" element={<Tracking />} />
       </Routes>
     </Router>
   );

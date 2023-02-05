@@ -23,12 +23,20 @@ const dispatcherTabs = [
     name: "Deliveries",
     endpoint: "deliveries",
   },
+  {
+    name: "Tracking",
+    endpoint: "tracking",
+  },
 ];
 
 const userTabs = [
   {
     name: "Deliveries",
     endpoint: "user-deliveries",
+  },
+  {
+    name: "Tracking",
+    endpoint: "tracking",
   },
 ];
 
