@@ -68,8 +68,6 @@ const Deliverer = () => {
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [updatedDeliverers, setUpdatedDeliverers] = useState([]);
-  const [deletedDeliverers, setDeletedDeliverers] = useState([]);
-  const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedDeliverers([...updatedDeliverers, newRow]);
@@ -108,23 +106,6 @@ const Deliverer = () => {
             },
           }
         )
-        .then((response) => {
-          setMessage(response.data.message);
-          setError(false);
-          setIsOpenAlert(true);
-        })
-        .catch((error) => {
-          setMessage(error.response.data.message);
-          setError(true);
-          setIsOpenAlert(true);
-        });
-    }
-  };
-
-  const deleteDeliverers = () => {
-    for (let i = 0; i < deletedDeliverers.length; i++) {
-      axios
-        .post(`${url.base}/dispatcher/delete_user/${deletedDeliverers[i]}`)
         .then((response) => {
           setMessage(response.data.message);
           setError(false);
@@ -190,63 +171,35 @@ const Deliverer = () => {
             disableSelectionOnClick
             disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
-            checkboxSelection
             processRowUpdate={handleProcessRowUpdate}
-            onSelectionModelChange={(itm) => setDeletedDeliverers(itm)}
             style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
             sx={{
               boxShadow: "5",
             }}
           />
-          <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent={"space-between"}
+
+          <Button
+            disabled={updatedDeliverers.length < 1}
+            sx={{ borderRadius: 1 }}
+            variant="contained"
+            color="primary"
+            style={{
+              height: "40px",
+              width: "200px",
+              marginTop: "10px",
+            }}
+            onClick={() => {
+              setIsOpenDialog(true);
+            }}
           >
-            <Button
-              disabled={deletedDeliverers.length < 1}
-              sx={{ borderRadius: 1 }}
-              variant="contained"
-              color="primary"
-              style={{
-                height: "40px",
-                width: "250px",
-                marginTop: "10px",
-              }}
-              onClick={() => {
-                setIsOpenDialog(true);
-                setIsAlertforDelete(true);
-              }}
-            >
-              {" "}
-              Delete Selected {deletedDeliverers.length > 1
-                ? "Items"
-                : "Item"}{" "}
-            </Button>
-            <Button
-              disabled={updatedDeliverers.length < 1}
-              sx={{ borderRadius: 1 }}
-              variant="contained"
-              color="primary"
-              style={{
-                height: "40px",
-                width: "200px",
-                marginTop: "10px",
-              }}
-              onClick={() => {
-                setIsOpenDialog(true);
-                setIsAlertforDelete(false);
-              }}
-            >
-              Submit Changes
-            </Button>
-          </Box>
+            Submit Changes
+          </Button>
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              isAlertforDelete ? deleteDeliverers() : updateDeliverers();
+              updateDeliverers();
             }}
           />
           {isOpenAlert && (

@@ -62,8 +62,6 @@ const Dispatcher = () => {
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [updatedDispatchers, setUpdatedDispatchers] = useState([]);
-  const [deletedDispatchers, setDeletedDispatchers] = useState([]);
-  const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedDispatchers([...updatedDispatchers, newRow]);
@@ -102,23 +100,6 @@ const Dispatcher = () => {
             },
           }
         )
-        .then((response) => {
-          setMessage(response.data.message);
-          setError(false);
-          setIsOpenAlert(true);
-        })
-        .catch((error) => {
-          setMessage(error.response.data.message);
-          setError(true);
-          setIsOpenAlert(true);
-        });
-    }
-  };
-
-  const deleteDispatchers = () => {
-    for (let i = 0; i < deletedDispatchers.length; i++) {
-      axios
-        .post(`${url.base}/delivery/delete/${deletedDispatchers[i]}`)
         .then((response) => {
           setMessage(response.data.message);
           setError(false);
@@ -183,64 +164,35 @@ const Dispatcher = () => {
             disableSelectionOnClick
             disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
-            checkboxSelection
             processRowUpdate={handleProcessRowUpdate}
-            onSelectionModelChange={(itm) => setDeletedDispatchers(itm)}
             style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
             sx={{
               boxShadow: "5",
             }}
           />
 
-          <Box
-            display="flex"
-            flexDirection="row"
-            justifyContent={"space-between"}
+          <Button
+            disabled={updatedDispatchers.length < 1}
+            sx={{ borderRadius: 1 }}
+            variant="contained"
+            color="primary"
+            style={{
+              height: "40px",
+              width: "200px",
+              marginTop: "10px",
+            }}
+            onClick={() => {
+              setIsOpenDialog(true);
+            }}
           >
-            <Button
-              disabled={deletedDispatchers.length < 1}
-              sx={{ borderRadius: 1 }}
-              variant="contained"
-              color="primary"
-              style={{
-                height: "40px",
-                width: "250px",
-                marginTop: "10px",
-              }}
-              onClick={() => {
-                setIsOpenDialog(true);
-                setIsAlertforDelete(true);
-              }}
-            >
-              {" "}
-              Delete Selected {deletedDispatchers.length > 1
-                ? "Items"
-                : "Item"}{" "}
-            </Button>
-            <Button
-              disabled={updatedDispatchers.length < 1}
-              sx={{ borderRadius: 1 }}
-              variant="contained"
-              color="primary"
-              style={{
-                height: "40px",
-                width: "200px",
-                marginTop: "10px",
-              }}
-              onClick={() => {
-                setIsOpenDialog(true);
-                setIsAlertforDelete(false);
-              }}
-            >
-              Submit Changes
-            </Button>
-          </Box>
+            Submit Changes
+          </Button>
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              isAlertforDelete ? deleteDispatchers() : updateDispatchers();
+              updateDispatchers();
             }}
           />
           {isOpenAlert && (
