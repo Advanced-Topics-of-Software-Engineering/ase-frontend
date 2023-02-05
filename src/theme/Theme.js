@@ -25,6 +25,11 @@ const theme = createTheme({
       fontSize: 50,
       fontWeight: "bold",
     },
+    h1: {
+      fontFamily: "Lucida",
+      fontSize: 25,
+      fontWeight: "bold",
+    },
     button: {
       fontFamily: "Lucida",
       fontWeight: "bold",

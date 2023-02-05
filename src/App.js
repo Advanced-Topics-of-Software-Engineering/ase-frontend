@@ -2,7 +2,6 @@ import React from "react";
 import "./App.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./pages/login/Login";
-import UserDeliveries from "./pages/userDeliveries/UserDeliveries";
 import Customer from "./pages/customer/Customer";
 import Deliverer from "./pages/deliverer/Deliverer";
 import Deliveries from "./pages/deliveries/Deliveries";
@@ -11,6 +10,8 @@ import Register from "./pages/register/Register";
 import Home from "./pages/home/Home";
 import QRCodeGenerator from "./QRCodeGenerator";
 import Dispatcher from "./pages/dispatcher/Dispatcher";
+import Profile from "./pages/profile/Profile";
+import UserDeliveries from "./pages/userDeliveries/UserDeliveries";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route exact path="/deliverers" element={<Deliverer />} />
         <Route exact path="/deliveries" element={<Deliveries />} />
         <Route exact path="/pickup-boxes" element={<PickupBoxes />} />
+        <Route exact path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

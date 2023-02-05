@@ -23,12 +23,20 @@ const dispatcherTabs = [
     name: "Deliveries",
     endpoint: "deliveries",
   },
+  {
+    name: "Profile",
+    endpoint: "profile",
+  },
 ];
 
 const userTabs = [
   {
     name: "Deliveries",
     endpoint: "user-deliveries",
+  },
+  {
+    name: "Profile",
+    endpoint: "profile",
   },
 ];
 
@@ -37,7 +45,7 @@ function Header() {
 
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
-    console.log("header", user);
+
     if (user !== null) {
       setUserType(user.userType);
     }

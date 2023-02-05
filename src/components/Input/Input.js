@@ -4,7 +4,15 @@ import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import "./Input.css";
 
-function Input({ name, type = "text", label, onChange, isSecured = false }) {
+function Input({
+  name,
+  type = "text",
+  label,
+  onChange,
+  isSecured = false,
+  disabled = false,
+  required = true,
+}) {
   const [value, setValue] = useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -17,7 +25,7 @@ function Input({ name, type = "text", label, onChange, isSecured = false }) {
   return !isSecured ? (
     <TextField
       fullWidth
-      required
+      required={required}
       onChange={handleChange}
       name={name}
       value={value}
@@ -25,6 +33,7 @@ function Input({ name, type = "text", label, onChange, isSecured = false }) {
       type={type}
       variant="outlined"
       label={label}
+      disabled={disabled}
       InputProps={{
         classes: {
           notchedOutline: "input-border",
@@ -40,7 +49,7 @@ function Input({ name, type = "text", label, onChange, isSecured = false }) {
   ) : (
     <TextField
       fullWidth
-      required
+      required={required}
       onChange={handleChange}
       name={name}
       value={value}
@@ -48,6 +57,7 @@ function Input({ name, type = "text", label, onChange, isSecured = false }) {
       type={showPassword ? "text" : "password"}
       variant="outlined"
       label={label}
+      disabled={disabled}
       InputProps={{
         endAdornment: (
           <InputAdornment position="end">
