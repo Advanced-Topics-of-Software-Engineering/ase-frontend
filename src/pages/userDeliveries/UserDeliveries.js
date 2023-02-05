@@ -7,7 +7,6 @@ import { Box, Button, Snackbar, Alert } from "@mui/material";
 import "../../App.css";
 import axios from "axios";
 import url from "../../API";
-import ResponsiveDialog from "../../components/ResponsiveDialog";
 import QRCodeGenerator from "../QRCode/QRCodeGenerator";
 import CustomPopover from "../../components/CustomPopover";
 
@@ -24,13 +23,14 @@ const UserDeliveries = () => {
   ]);
 
   const [deliveries, setDeliveries] = useState([]);
+  const [message, setMessage] = useState();
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [error, setError] = useState();
 
   const columns = [
     { field: "id", headerName: "ID", flex: 1 },
-    { field: "trackingCode", headerName: "Tracking Code", flex: 1 },
+    { field: "trackingID", headerName: "Tracking Id", flex: 1 },
     { field: "customer", headerName: "Assigned Customer", flex: 1 },
     { field: "boxName", headerName: "Assigned Box Name", flex: 1 },
     { field: "boxAddress", headerName: "Assigned Box Address", flex: 1 },
@@ -39,6 +39,7 @@ const UserDeliveries = () => {
       field: "qrCode",
       headerName: "QR Code",
       width: 150,
+      hide: auth.userType !== "ROLE_DELIVERER",
       renderCell: (params) => {
         const onClick = (e) => {
           updateDeliveryStatus(params.value);
@@ -65,12 +66,12 @@ const UserDeliveries = () => {
         }
       )
       .then((response) => {
-        // setMessage(response.data.message);
+        setMessage(response.data.message);
         setError(false);
         setIsOpenAlert(true);
       })
       .catch((error) => {
-        // setMessage(error.response.data.message);
+        setMessage(error.response.data.message);
         setError(true);
         setIsOpenAlert(true);
       });
@@ -142,9 +143,10 @@ const UserDeliveries = () => {
               trackingID: delivery.trackingID,
               boxName: delivery.box.name,
               boxAddress: delivery.box.streetAddress,
-              customerId: delivery.customer.id,
-              delivererId: delivery.deliverer.id,
+              customerId: delivery.customerID,
+              delivererId: delivery.delivererID,
               boxID: delivery.box.id,
+              qrCode: delivery.trackingID,
             }))}
             columns={columns}
             editMode="row"
@@ -160,6 +162,28 @@ const UserDeliveries = () => {
               boxShadow: "5",
             }}
           />
+          {isOpenAlert && (
+            <Snackbar
+              open={isOpenAlert}
+              autoHideDuration={1000}
+              onClose={() => {
+                setIsOpenAlert(null);
+                if (!error) {
+                  window.location.reload(true);
+                }
+              }}
+            >
+              <Alert
+                onClose={() => {
+                  setIsOpenAlert(null);
+                }}
+                severity={error ? "error" : "success"}
+                sx={{ width: "100%" }}
+              >
+                {message}
+              </Alert>
+            </Snackbar>
+          )}
         </Box>
       </div>
     </ThemeProvider>
