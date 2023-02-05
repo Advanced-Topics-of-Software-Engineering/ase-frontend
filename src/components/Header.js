@@ -37,7 +37,7 @@ function Header() {
 
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
-    console.log("header", user);
+
     if (user !== null) {
       setUserType(user.userType);
     }
@@ -98,7 +98,7 @@ function Header() {
             </Button>
           ) : (
             <Button
-              href={"/home"}
+              href={"/profile"}
               sx={{ color: "white", justifyContent: "flex-end" }}
             >
               Login

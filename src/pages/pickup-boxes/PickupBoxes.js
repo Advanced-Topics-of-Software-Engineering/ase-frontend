@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
-import Header from "../Header";
+import Header from "../../components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Snackbar, Alert } from "@mui/material";
 import "../../App.css";
 import axios from "axios";
 import url from "../../API";
-import CustomAccordion from "../CustomAccordion";
-import ResponsiveDialog from "../ResponsiveDialog";
+import CustomAccordion from "../../components/CustomAccordion";
+import ResponsiveDialog from "../../components/ResponsiveDialog";
+import Input from "../../components/Input/Input";
 
 const columns = [
   { field: "id", headerName: "ID", flex: 1 },
@@ -27,14 +28,7 @@ const columns = [
 ];
 
 const PickupBoxes = () => {
-  const [boxes, setBoxes] = useState([
-    {
-      id: "",
-      name: "",
-      streetAddress: "",
-    },
-  ]);
-
+  const [boxes, setBoxes] = useState([]);
   const [auth, setAuth] = useState([
     {
       accessToken: "",
@@ -47,12 +41,20 @@ const PickupBoxes = () => {
   ]);
 
   const [error, setError] = useState();
-  const [newBox, setNewBox] = useState([]);
+  const [message, setMessage] = useState();
+  const [newBox, setNewBox] = useState({ name: "", streetAddress: "" });
   const [updatedBoxes, setUpdatedBoxes] = useState([]);
   const [deletedBoxes, setDeletedBoxes] = useState([]);
   const [isOpenDialog, setIsOpenDialog] = useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
   const [isAlertforDelete, setIsAlertforDelete] = useState(false);
+
+  const handleChange = (e) => {
+    setNewBox((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedBoxes([...updatedBoxes, newRow]);
@@ -63,6 +65,7 @@ const PickupBoxes = () => {
       .get(`${url.base}/box`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
+          Authorization: `Bearer ${auth.accessToken}`,
         },
       })
       .then((response) => {
@@ -76,19 +79,28 @@ const PickupBoxes = () => {
   const updateBoxes = async () => {
     for (let i = 0; i < updatedBoxes.length; i++) {
       axios
-        .post(`${url.base}/box/update/${updatedBoxes[i].id}`, {
-          name: updatedBoxes[i].name,
-          streetAddress: updatedBoxes[i].address,
-        })
+        .post(
+          `${url.base}/box/update/${updatedBoxes[i].id}`,
+          {
+            name: updatedBoxes[i].name,
+            streetAddress: updatedBoxes[i].address,
+          },
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "ase",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        )
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(false);
         });
     }
   };
@@ -96,32 +108,52 @@ const PickupBoxes = () => {
   const deleteBoxes = () => {
     for (let i = 0; i < deletedBoxes.length; i++) {
       axios
-        .post(`${url.base}/box/delete/${deletedBoxes[i]}`)
+        .post(
+          `${url.base}/box/delete/${deletedBoxes[i]}`,
+          {},
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "ase",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
+        )
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         })
         .catch((error) => {
-          setError(error.toJSON().message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
-          setIsAlertforDelete(true);
         });
     }
   };
 
   const createNewBox = async () => {
     axios
-      .post(`${url.base}/box`, {
-        name: newBox[0],
-        streetAddress: newBox[1],
-      })
+      .post(
+        `${url.base}/box`,
+        {
+          name: newBox.name,
+          streetAddress: newBox.streetAddress,
+        },
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "ase",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      )
       .then((response) => {
-        setError("");
+        setMessage(response.data.message);
+        setError(false);
         setIsOpenAlert(true);
       })
       .catch((error) => {
-        setError(error.toJSON().message);
+        setMessage(error.response.data.message);
+        setError(true);
         setIsOpenAlert(true);
       });
   };
@@ -135,7 +167,7 @@ const PickupBoxes = () => {
       if (auth !== null && auth.userType === "ROLE_DISPATCHER") {
         getBoxes();
       }
-    }, 500);
+    }, 100);
   }, [auth]);
 
   return (
@@ -155,18 +187,25 @@ const PickupBoxes = () => {
           }}
         >
           <CustomAccordion
-            datas={[
-              {
-                title: "Name",
-              },
-              {
-                title: "Address",
-              },
-            ]}
-            newObject={newBox}
+            title={"Add New Box"}
+            firstField={
+              <Input
+                name={"name"}
+                margin={""}
+                onChange={handleChange}
+                label={"Name"}
+              />
+            }
+            secondField={
+              <Input
+                name={"streetAddress"}
+                margin={""}
+                onChange={handleChange}
+                label={"Address"}
+              />
+            }
+            available={false}
             handleCreate={createNewBox}
-            header={"Add new box"}
-            isTextBoxes={false}
           />
           <DataGrid
             rows={boxes.map((box) => ({
@@ -197,7 +236,7 @@ const PickupBoxes = () => {
             justifyContent={"space-between"}
           >
             <Button
-              type="delete"
+              disabled={deletedBoxes.length < 1}
               sx={{ borderRadius: 1 }}
               variant="contained"
               color="primary"
@@ -209,14 +248,14 @@ const PickupBoxes = () => {
               }}
               onClick={() => {
                 setIsOpenDialog(true);
-                window.location.reload(true);
+                setIsAlertforDelete(true);
               }}
             >
               {" "}
               Delete Selected {deletedBoxes.length > 1 ? "Items" : "Item"}{" "}
             </Button>
             <Button
-              type="submit"
+              disabled={updatedBoxes.length < 1}
               sx={{ borderRadius: 1 }}
               variant="contained"
               color="primary"
@@ -227,6 +266,7 @@ const PickupBoxes = () => {
               }}
               onClick={() => {
                 setIsOpenDialog(true);
+                setIsAlertforDelete(false);
               }}
             >
               Submit Changes
@@ -238,7 +278,7 @@ const PickupBoxes = () => {
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
             handleYesClick={() => {
-              isAlertforDelete ? updateBoxes() : deleteBoxes();
+              isAlertforDelete ? deleteBoxes() : updateBoxes();
             }}
           />
           {isOpenAlert && (
@@ -246,23 +286,20 @@ const PickupBoxes = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
+                if (!error) {
+                  window.location.reload(true);
+                }
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
-                severity={error === "" ? "success" : "error"}
+                severity={error ? "error" : "success"}
                 sx={{ width: "100%" }}
               >
-                {error === ""
-                  ? `Pickup ${deletedBoxes.length > 1 ? "boxes" : "box "} ${
-                      isAlertforDelete ? "deleted" : "updated"
-                    } successfully`
-                  : error}
+                {message}
               </Alert>
             </Snackbar>
           )}

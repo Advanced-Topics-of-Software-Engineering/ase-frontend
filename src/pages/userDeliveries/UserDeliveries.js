@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
-import Header from "../Header";
+import Header from "../../components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Snackbar, Alert } from "@mui/material";
 import "../../App.css";
 import axios from "axios";
 import url from "../../API";
-import ResponsiveDialog from "../ResponsiveDialog";
+import ResponsiveDialog from "../../components/ResponsiveDialog";
 
 const columns = [
   { field: "id", headerName: "ID", flex: 1 },
@@ -82,7 +82,7 @@ const UserDeliveries = () => {
   useEffect(() => {
     setTimeout(() => {
       getDeliveries();
-    }, 500);
+    }, 100);
   }, []);
 
   return (
@@ -151,13 +151,14 @@ const UserDeliveries = () => {
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
+                if (!error) {
+                  window.location.reload(true);
+                }
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
                 severity={error === "" ? "success" : "error"}

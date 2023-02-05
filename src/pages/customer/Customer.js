@@ -1,33 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
-import Header from "../Header";
+import Header from "../../components/Header";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Snackbar, Alert } from "@mui/material";
 import "../../App.css";
 import axios from "axios";
 import url from "../../API";
-import ResponsiveDialog from "../ResponsiveDialog";
+import ResponsiveDialog from "../../components/ResponsiveDialog";
 
 const columns = [
   { field: "id", headerName: "ID", flex: 1 },
   {
     field: "username",
     headerName: "Username",
-    flex: 0.5,
+    flex: 1,
     editable: true,
     sortable: false,
   },
   {
     field: "email",
     headerName: "Email",
-    flex: 0.7,
-    editable: true,
-    sortable: false,
-  },
-  {
-    field: "rfidtoken",
-    headerName: "RFID Token",
     flex: 1,
     editable: true,
     sortable: false,
@@ -35,8 +28,7 @@ const columns = [
   {
     field: "role",
     headerName: "User Type",
-    flex: 0.3,
-    editable: true,
+    flex: 1,
     sortable: false,
   },
   {
@@ -59,20 +51,7 @@ function setRole(role) {
 }
 
 const Customer = () => {
-  const [customers, setCustomer] = useState([
-    {
-      id: "",
-      email: "",
-      rfidtoken: "",
-      username: "",
-      role: "",
-      password: "",
-    },
-  ]);
-  const [updatedCustomers, setUpdatedCustomers] = useState([]);
-  const [isOpenDialog, setIsOpenDialog] = useState(false);
-  const [isOpenAlert, setIsOpenAlert] = useState(false);
-  const [error, setError] = useState();
+  const [customers, setCustomer] = useState([]);
   const [auth, setAuth] = useState([
     {
       accessToken: "",
@@ -83,6 +62,13 @@ const Customer = () => {
       username: "",
     },
   ]);
+  const [updatedCustomers, setUpdatedCustomers] = useState([]);
+  const [isOpenDialog, setIsOpenDialog] = useState(false);
+  const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [message, setMessage] = useState();
+  const [error, setError] = useState();
+  const [deletedCustomers, setDeletedCustomers] = useState([]);
+  const [isAlertforDelete, setIsAlertforDelete] = useState(false);
 
   const handleProcessRowUpdate = (newRow, oldRow) => {
     setUpdatedCustomers([...updatedCustomers, newRow]);
@@ -90,7 +76,7 @@ const Customer = () => {
 
   const getCustomers = () => {
     axios
-      .get(`${url.auth}/dispatcher/get_all_customers`, {
+      .get(`${url.base}/dispatcher/get_all_customers`, {
         headers: {
           "ngrok-skip-browser-warning": "ase",
           Authorization: `Bearer ${auth.accessToken}`,
@@ -108,7 +94,7 @@ const Customer = () => {
     for (let i = 0; i < updatedCustomers.length; i++) {
       axios
         .post(
-          `${url.auth}/dispatcher/edit_user/${updatedCustomers[i].id}`,
+          `${url.base}/dispatcher/edit_user/${updatedCustomers[i].id}`,
           {
             username: updatedCustomers[i].username,
             email: updatedCustomers[i].email,
@@ -122,17 +108,34 @@ const Customer = () => {
           }
         )
         .then((response) => {
-          setError("");
+          setMessage(response.data.message);
+          setError(false);
           setIsOpenAlert(true);
-          getCustomers();
         })
         .catch((error) => {
-          setError(error.response.data.message);
+          setMessage(error.response.data.message);
+          setError(true);
           setIsOpenAlert(true);
         });
     }
   };
 
+  const deleteCustomers = () => {
+    for (let i = 0; i < deletedCustomers.length; i++) {
+      axios
+        .post(`${url.base}/dispatcher/delete_user/${deletedCustomers[i]}`)
+        .then((response) => {
+          setMessage(response.data.message);
+          setError(false);
+          setIsOpenAlert(true);
+        })
+        .catch((error) => {
+          setMessage(error.response.data.message);
+          setError(true);
+          setIsOpenAlert(true);
+        });
+    }
+  };
   useEffect(() => {
     setAuth(JSON.parse(sessionStorage.getItem("user")));
   }, []);
@@ -142,7 +145,7 @@ const Customer = () => {
       if (auth !== null && auth.userType === "ROLE_DISPATCHER") {
         getCustomers();
       }
-    }, 500);
+    }, 100);
   }, [auth]);
 
   return (
@@ -176,60 +179,92 @@ const Customer = () => {
               id: customer.id,
               username: customer.username,
               email: customer.email,
-              rfidtoken: customer.rfidtoken,
               role: setRole(customer.role),
             }))}
             columns={columns}
             editMode="row"
             rowsPerPageOptions={[7]}
             disableSelectionOnClick
+            disableColumnMenu
             experimentalFeatures={{ newEditingApi: true }}
+            checkboxSelection
             processRowUpdate={handleProcessRowUpdate}
+            onSelectionModelChange={(itm) => setDeletedCustomers(itm)}
             style={{ marginTop: 10, backgroundColor: "#fcfbfa" }}
             sx={{
               boxShadow: "5",
             }}
           />
-          <Button
-            type="submit"
-            sx={{ borderRadius: 1 }}
-            variant="contained"
-            color="primary"
-            style={{
-              height: "40px",
-              width: "200px",
-              marginTop: "10px",
-            }}
-            onClick={() => {
-              setIsOpenDialog(true);
-            }}
+          <Box
+            display="flex"
+            flexDirection="row"
+            justifyContent={"space-between"}
           >
-            Submit Changes
-          </Button>
+            <Button
+              disabled={deletedCustomers.length < 1}
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "250px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+                setIsAlertforDelete(true);
+              }}
+            >
+              {" "}
+              Delete Selected {deletedCustomers.length > 1
+                ? "Items"
+                : "Item"}{" "}
+            </Button>
+            <Button
+              disabled={updatedCustomers.length < 1}
+              sx={{ borderRadius: 1 }}
+              variant="contained"
+              color="primary"
+              style={{
+                height: "40px",
+                width: "200px",
+                marginTop: "10px",
+              }}
+              onClick={() => {
+                setIsOpenDialog(true);
+                setIsAlertforDelete(false);
+              }}
+            >
+              Submit Changes
+            </Button>
+          </Box>
           <ResponsiveDialog
             isOpen={isOpenDialog}
             handleClose={() => setIsOpenDialog(false)}
             title="Are you sure?"
-            handleYesClick={updateCustomers}
+            handleYesClick={() => {
+              isAlertforDelete ? deleteCustomers() : updateCustomers();
+            }}
           />
           {isOpenAlert && (
             <Snackbar
               open={isOpenAlert}
               autoHideDuration={1000}
               onClose={() => {
-                window.location.reload(true);
                 setIsOpenAlert(null);
+                if (!error) {
+                  window.location.reload(true);
+                }
               }}
             >
               <Alert
                 onClose={() => {
-                  window.location.reload(true);
                   setIsOpenAlert(null);
                 }}
-                severity={error === "" ? "success" : "error"}
+                severity={error ? "error" : "success"}
                 sx={{ width: "100%" }}
               >
-                {error === "" ? "Values successfully changed" : error}
+                {message}
               </Alert>
             </Snackbar>
           )}

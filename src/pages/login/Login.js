@@ -1,29 +1,18 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  IconButton,
-  InputAdornment,
-  Snackbar,
-  Alert,
-} from "@mui/material";
-import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
-import { ThemeProvider } from "@mui/material/styles";
-import theme from "../../theme/Theme";
-import "./Login.css";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import { ThemeProvider } from "@mui/material/styles";
+import { Box, Button, Typography, Snackbar, Alert } from "@mui/material";
+import theme from "../../theme/Theme";
+import "./Login.css";
 import url from "../../API";
+import Input from "../../components/Input/Input";
 
 const Login = () => {
   const [inputs, setInputs] = useState({ username: "", password: "" });
-  const [showPassword, setShowPassword] = React.useState(false);
   const [redirect, setRedirect] = React.useState(false);
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [message, setMessage] = useState();
   const [error, setError] = useState();
 
   const handleChange = (e) => {
@@ -37,19 +26,31 @@ const Login = () => {
     e.preventDefault();
 
     axios
-      .post(`${url.auth}/api/auth/signin`, {
-        username: inputs.username,
-        password: inputs.password,
-      })
+      .post(
+        `${url.base}/api/auth/signin`,
+        {
+          username: inputs.username,
+          password: inputs.password,
+        },
+
+        {
+          headers: {
+            "ngrok-skip-browser-warning": "ase",
+          },
+        }
+      )
       .then((response) => {
+        console.log(response);
         if (response.data.accessToken) {
           sessionStorage.setItem("user", JSON.stringify(response.data));
           setRedirect(true);
         }
       })
       .catch((error) => {
-        setError(error.toJSON().message);
+        console.log(error);
+        setMessage(error.response.data.message);
         setIsOpenAlert(true);
+        setError(true);
       });
   };
 
@@ -58,7 +59,7 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <div class="login-background">
           <div class="bg"></div>
-          {redirect && <Navigate to="/home" />}
+          {redirect && <Navigate to="/profile" />}
           <Box
             display="flex"
             flexDirection={"column"}
@@ -84,70 +85,14 @@ const Login = () => {
             >
               Login
             </Typography>
-            <TextField
-              fullWidth
-              required
-              onChange={handleChange}
-              name="username"
-              value={inputs.username}
-              margin="normal"
-              type={"text"}
-              variant="outlined"
-              label="username"
-              InputProps={{
-                classes: {
-                  notchedOutline: "input-border",
-                },
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: "inputLabel",
-                  focused: "inputLabel",
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              required
+            <Input onChange={handleChange} name="username" label="username" />
+            <Input
               onChange={handleChange}
               name="password"
-              value={inputs.password}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
-                      {showPassword ? (
-                        <VisibilityOffRoundedIcon />
-                      ) : (
-                        <VisibilityRoundedIcon />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                classes: {
-                  notchedOutline: "input-border",
-                },
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: "inputLabel",
-                  focused: "inputLabel",
-                },
-              }}
-              sx={{
-                ".MuiSvgIcon-root ": {
-                  fill: "#660090",
-                },
-              }}
-              margin="normal"
-              type={showPassword ? "text" : "password"}
-              variant="outlined"
               label="password"
+              isSecured={true}
             />
+
             <Button
               type="submit"
               sx={{ marginTop: 3, borderRadius: 3 }}
@@ -161,6 +106,7 @@ const Login = () => {
             >
               Login
             </Button>
+
             {isOpenAlert && (
               <Snackbar
                 open={isOpenAlert}
@@ -176,7 +122,7 @@ const Login = () => {
                   severity={"error"}
                   sx={{ width: "100%" }}
                 >
-                  {error}
+                  {message}
                 </Alert>
               </Snackbar>
             )}

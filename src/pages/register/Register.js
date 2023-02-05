@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  TextField,
   Typography,
-  IconButton,
-  InputAdornment,
   FormControl,
   InputLabel,
   Select,
@@ -13,14 +10,13 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
-import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
-import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../theme/Theme";
 import "./Register.css";
-import Header from "../Header";
+import Header from "../../components/Header";
 import axios from "axios";
 import url from "../../API";
+import Input from "../../components/Input/Input";
 
 const Register = () => {
   const [inputs, setInputs] = useState({
@@ -28,12 +24,20 @@ const Register = () => {
     password: "",
     username: "",
   });
+  const [auth, setAuth] = useState([
+    {
+      accessToken: "",
+      email: "",
+      id: "",
+      tokenType: "",
+      userType: "",
+      username: "",
+    },
+  ]);
   const [userType, setUserType] = useState("");
-  const [showPassword, setShowPassword] = React.useState(false);
   const [isOpenAlert, setIsOpenAlert] = useState(false);
+  const [message, setMessage] = useState();
   const [error, setError] = useState();
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleChange = (e) => {
     setInputs((prevState) => ({
@@ -50,7 +54,7 @@ const Register = () => {
     e.preventDefault();
     axios
       .post(
-        `${url.auth}/api/auth/signup`,
+        `${url.base}/api/auth/signup`,
         {
           username: inputs.username,
           email: inputs.email,
@@ -59,20 +63,25 @@ const Register = () => {
         },
         {
           headers: {
-            Authorization:
-              "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZ2VoYW5fdGVzdCIsImlhdCI6MTY3NTUwNjIxOSwiZXhwIjoxNjc1NTkyNjE5fQ.6qnpQkgn2V5KaEQYCqkti8A176wLnD_V7DgAhehxflg",
+            Authorization: `Bearer ${auth.accessToken}`,
           },
         }
       )
       .then((response) => {
-        setError("");
+        setMessage(response.data.message);
         setIsOpenAlert(true);
+        setError(false);
       })
       .catch((error) => {
-        setError(error.response.data.message);
+        setMessage(error.response.data.message);
         setIsOpenAlert(true);
+        setError(true);
       });
   };
+
+  useEffect(() => {
+    setAuth(JSON.parse(sessionStorage.getItem("user")));
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -105,92 +114,20 @@ const Register = () => {
             >
               Create new account
             </Typography>
-            <TextField
-              fullWidth
-              required
-              onChange={handleChange}
+            <Input
               name="email"
-              value={inputs.email}
-              margin="normal"
               type={"email"}
-              variant="outlined"
               label="email"
-              InputProps={{
-                classes: {
-                  notchedOutline: "input-border",
-                },
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: "inputLabel",
-                  focused: "inputLabel",
-                },
-              }}
-            />
-            <TextField
-              fullWidth
-              required
               onChange={handleChange}
-              name="username"
-              value={inputs.username}
-              margin="normal"
-              type={"text"}
-              variant="outlined"
-              label="username"
-              InputProps={{
-                classes: {
-                  notchedOutline: "input-border",
-                },
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: "inputLabel",
-                  focused: "inputLabel",
-                },
-              }}
             />
-            <TextField
-              fullWidth
-              required
-              onChange={handleChange}
+            <Input name="username" label="username" onChange={handleChange} />
+            <Input
               name="password"
-              value={inputs.password}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
-                      {showPassword ? (
-                        <VisibilityOffRoundedIcon />
-                      ) : (
-                        <VisibilityRoundedIcon />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                classes: {
-                  notchedOutline: "input-border",
-                },
-              }}
-              InputLabelProps={{
-                classes: {
-                  root: "inputLabel",
-                  focused: "inputLabel",
-                },
-              }}
-              sx={{
-                ".MuiSvgIcon-root ": {
-                  fill: "#660090",
-                },
-              }}
-              margin="normal"
-              type={showPassword ? "text" : "password"}
-              variant="outlined"
               label="password"
+              onChange={handleChange}
+              isSecured={true}
             />
+
             <FormControl fullWidth required margin="normal" variant="outlined">
               <InputLabel style={{ color: "#660090" }}>user type</InputLabel>
               <Select
@@ -234,18 +171,23 @@ const Register = () => {
             >
               Register
             </Button>
+
             {isOpenAlert && (
               <Snackbar
                 open={isOpenAlert}
-                autoHideDuration={3000}
-                onClose={() => setIsOpenAlert(null)}
+                autoHideDuration={1000}
+                onClose={() => {
+                  setIsOpenAlert(null);
+                }}
               >
                 <Alert
-                  onClose={() => setIsOpenAlert(null)}
-                  severity={"error"}
+                  onClose={() => {
+                    setIsOpenAlert(null);
+                  }}
+                  severity={error ? "error" : "success"}
                   sx={{ width: "100%" }}
                 >
-                  {error}
+                  {message}
                 </Alert>
               </Snackbar>
             )}
