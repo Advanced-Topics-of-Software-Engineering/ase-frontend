@@ -59,7 +59,7 @@ const Login = () => {
       <form onSubmit={handleSubmit}>
         <div class="login-background">
           <div class="bg"></div>
-          {redirect && <Navigate to="/home" />}
+          {redirect && <Navigate to="/profile" />}
           <Box
             display="flex"
             flexDirection={"column"}

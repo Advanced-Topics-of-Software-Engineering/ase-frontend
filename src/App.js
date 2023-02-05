@@ -7,7 +7,6 @@ import Deliverer from "./pages/deliverer/Deliverer";
 import Deliveries from "./pages/deliveries/Deliveries";
 import PickupBoxes from "./pages/pickup-boxes/PickupBoxes";
 import Register from "./pages/register/Register";
-import Home from "./pages/home/Home";
 import QRCodeGenerator from "./QRCodeGenerator";
 import Dispatcher from "./pages/dispatcher/Dispatcher";
 import Profile from "./pages/profile/Profile";
@@ -18,7 +17,6 @@ function App() {
     <Router>
       <Routes>
         <Route exact path="/" element={<Login />} />
-        <Route exact path="/home" element={<Home />} />
         <Route exact path="/sign-up" element={<Register />} />
         <Route exact path="/user-deliveries" element={<UserDeliveries />} />
         <Route exact path="/dispatchers" element={<Dispatcher />} />

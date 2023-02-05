@@ -23,20 +23,12 @@ const dispatcherTabs = [
     name: "Deliveries",
     endpoint: "deliveries",
   },
-  {
-    name: "Profile",
-    endpoint: "profile",
-  },
 ];
 
 const userTabs = [
   {
     name: "Deliveries",
     endpoint: "user-deliveries",
-  },
-  {
-    name: "Profile",
-    endpoint: "profile",
   },
 ];
 
@@ -106,7 +98,7 @@ function Header() {
             </Button>
           ) : (
             <Button
-              href={"/home"}
+              href={"/profile"}
               sx={{ color: "white", justifyContent: "flex-end" }}
             >
               Login
